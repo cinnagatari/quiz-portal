@@ -9,7 +9,8 @@
 
 // 2. Vendors
 @import
-  'stylesheets/vendors/aceEditor';
+  'stylesheets/vendors/aceEditor',
+  'stylesheets/vendors/simpleMDE';
 
 // 3. Base stuff
 @import
@@ -34,7 +35,7 @@
 @import
   'stylesheets/pages/home',
   'stylesheets/pages/admin',
-  'stylesheets/pages/questionPool',
+  'stylesheets/pages/questions',
   'stylesheets/pages/questionEditor',
   'stylesheets/pages/categoryEditor';
 

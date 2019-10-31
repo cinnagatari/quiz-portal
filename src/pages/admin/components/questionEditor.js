@@ -243,8 +243,8 @@ export default function QuestionEditor({
   }
 
   return (
-    <div className="editor">
-      <div className={"center fields border1 border1-" + user.theme}>
+    <div className="q-editor">
+      <div className={"center e-fields bg-2-" + user.theme}>
         <div>
           {submitFailed && name.length === 0 ? (
             <p>Please Enter A Name</p>
@@ -315,9 +315,9 @@ export default function QuestionEditor({
           ))}
         </div>
       </div>
-      <div className="e-p-container">
+      <div className="e-container">
         {lang !== -1 && (
-          <div className={"center question border1 border1-" + user.theme}>
+          <div className={"center question bg-2-" + user.theme}>
             {Object.keys(question).length !== 0 && (
               <div className="center mde">
                 {submitFailed && checkQuestion() ? (
@@ -345,7 +345,7 @@ export default function QuestionEditor({
                   </button>
                 </div>
                 {lang !== -1 && (
-                  <div className="mde-container">
+                  <div className={"mde-container bg-3-" + user.theme}>
                     <SimpleMDE
                       key={LANGUAGES[lang] + question}
                       onChange={onChangeQuestion}
@@ -473,8 +473,9 @@ export default function QuestionEditor({
         )}
         {lang !== -1 && (
           <div
-            className={"center question-preview border1 border1-" + user.theme}
+            className={"center question-preview bg-2-" + user.theme}
           >
+            <p className="preview-title">Preview</p>
             <p className="preview-id">{name}</p>
             <Question
               id={name}

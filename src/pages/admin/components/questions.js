@@ -258,86 +258,77 @@ export default function Questions() {
   }
 
   return (
-    <div className="question-pool">
-      <div className="center pool-category">
-        {sections.map((s, i) => (
-          <button
-            key={s + i}
-            onClick={() => {
-              setCurrentS(currentS !== i ? i : -1);
-              setCurrentC(-1);
-              setCurrentQ(-1);
-            }}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
-      <div className="center pool-category">
-        {categories.map(
-          (c, i) =>
-            c.substring(0, c.indexOf("-")) === sections[currentS] && (
-              <button
-                onClick={() => {
-                  setCurrentC(currentC === i ? -1 : i);
-                  setCurrentQ(-1);
-                }}
-                key={c + i}
-              >
-                {c}
-              </button>
-            )
-        )}
-        {currentS !== -1 && (
-          <button onClick={() => setEditCat(true)}>edit categories</button>
-        )}
-        {editCat && (
-          <Popup
-            closePopup={setEditCat}
-            contents={
-              <EditCategories
-                categories={categories}
-                setCategories={setCategories}
-                versionCheck={versionCheck}
-                questions={questions}
-                setQuestions={setQuestions}
-                user={user}
-              />
-            }
-          />
-        )}
-      </div>
-      <div className="center category-questions">
-        {questions.map((q, i) => {
-          return q.category === categories[currentC] ? (
+    <div className="questions">
+      <div className={"q-sections bg-2-" + user.theme}>
+        <div style={{ display: 'flex', flexDirection: "column" }} className="center">
+          <p className={"center q-section-title bg-1-" + user.theme}>Sections</p>
+        </div>
+        <div className="section-btns">
+          {sections.map((s, i) => (
             <button
-              key={q.name + i}
+              className="section-btn"
+              key={s + i}
               onClick={() => {
-                setCurrentQ(currentQ !== i ? i : -1);
-                setAdding(false);
+                setCurrentS(currentS !== i ? i : -1);
+                setCurrentC(-1);
+                setCurrentQ(-1);
               }}
             >
-              {q.name}
+              {s}
             </button>
-          ) : (
-              undefined
-            );
-        })}
-        {currentC !== -1 && (
-          <button
-            onClick={() => {
-              setAdding(true);
-              setCurrentQ(-1);
-            }}
-          >
-            add question
-          </button>
-        )}
-        {currentQ !== -1 && (
-          <button onClick={() => deleteQ(questions[currentQ])}>
-            delete question
-          </button>
-        )}
+          ))}
+        </div>
+      </div>
+      <div className={"q-categories bg-2-" + user.theme}>
+        <div style={{ display: 'flex', flexDirection: "column" }} className="center">
+          <p className={"center q-category-title bg-1-" + user.theme}>Categories</p>
+          <button className="edit-category" onClick={() => setEditCat(true)}>Edit Categories</button>
+        </div>
+        <div className={"category-btns"}>
+          {categories.map(
+            (c, i) =>
+              c.substring(0, c.indexOf("-")) === sections[currentS] && (
+                <button
+                  className="category-btn"
+                  onClick={() => {
+                    setCurrentC(currentC === i ? -1 : i);
+                    setCurrentQ(-1);
+                  }}
+                  key={c + i}
+                >
+                  {c}
+                </button>
+              )
+          )}
+        </div>
+      </div>
+      <div className={"q-questions bg-2-" + user.theme}>
+        <div className="center" style={{ display: 'flex', flexDirection: "column" }}>
+          <p className={"center q-question-title bg-1-" + user.theme}>Questions</p>
+          <button className="center add-question" onClick={() => {
+            setAdding(true);
+            setCurrentQ(-1);
+          }}>Add Question</button>
+          {currentQ !== -1 && <button className="center delete-question" onClick={() => deleteQ(questions[currentQ])}>Delete Question</button>}
+        </div>
+        <div>
+          {questions.map((q, i) => {
+            return q.category === categories[currentC] ? (
+              <button
+                className="question-btn"
+                key={q.name + i}
+                onClick={() => {
+                  setCurrentQ(currentQ !== i ? i : -1);
+                  setAdding(false);
+                }}
+              >
+                {q.name}
+              </button>
+            ) : (
+                undefined
+              );
+          })}
+        </div>
       </div>
       {currentQ !== -1 && (
         <QuestionEditor
@@ -357,6 +348,21 @@ export default function Questions() {
           mode={"add"}
           categories={categories}
           editQuestion={reloadQ}
+        />
+      )}
+      {editCat && (
+        <Popup
+          closePopup={setEditCat}
+          contents={
+            <EditCategories
+              categories={categories}
+              setCategories={setCategories}
+              versionCheck={versionCheck}
+              questions={questions}
+              setQuestions={setQuestions}
+              user={user}
+            />
+          }
         />
       )}
     </div>
@@ -582,7 +588,7 @@ export function EditCategories({
       setCats(newData.c);
       setCategories(newData.c);
       localStorage.setItem("categories", JSON.stringify(newData.c));
-      if(newData.q.q !== "") {
+      if (newData.q.q !== "") {
         setQs(newData.q.q);
         setQuestions(newData.q.q);
         localStorage.setItem("all-questions", JSON.stringify(newData.q.q));

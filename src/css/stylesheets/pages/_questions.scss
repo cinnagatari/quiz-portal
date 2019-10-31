@@ -1,0 +1,79 @@
+.questions {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  .q-sections {
+    border-radius: 10px;
+    margin: 5px;
+    display: flex;
+    flex-direction: row;
+    .q-section-title {
+      border-radius: 10px;
+      margin: 5px;
+      padding: 5px;
+      flex: 1;
+      font-size: $text-base-size * 2.5;
+    }
+
+    .section-btns {
+      flex: 7;
+      flex-wrap: wrap;
+    }
+  }
+  .q-categories {
+    border-radius: 10px;
+    margin: 5px;
+    display: flex;
+    flex-direction: row;
+
+    .q-category-title {
+      border-radius: 10px;
+      margin: 5px;
+      padding: 5px;
+      flex: 1;
+      font-size: $text-base-size * 2;
+    }
+    .edit-category {
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: $text-base-size * 1.1;
+    }
+    .category-btns {
+      flex: 7;
+      flex-wrap: wrap;
+    }
+  }
+  .q-questions {
+    border-radius: 10px;
+    margin: 5px;
+    display: flex;
+    flex-direction: row;
+
+    .q-question-title {
+      border-radius: 10px;
+      margin: 5px;
+      padding: 5px;
+      flex: 1;
+      font-size: $text-base-size * 2;
+    }
+
+    .add-question {
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: $text-base-size * 1.1;
+    }
+
+    .delete-question {
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: $text-base-size * 0.9;
+    }
+
+    .question-btns {
+      flex: 7;
+      flex-wrap: wrap;
+    }
+  }
+}
+
+
