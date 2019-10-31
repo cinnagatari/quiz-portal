@@ -1,0 +1,80 @@
+.c-editor {
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  .c-title {
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    font-size: $text-base-size * 2.5;
+  }
+  .c-subtitle {
+    font-size: $text-base-size * 1.5;
+  }
+  .c-container {
+    border-radius: 5px;  
+    display: flex;
+    flex-direction: row;
+    padding-top: 5px;
+    .c-list-sections {
+      border-radius: 5px;
+      margin-right: 2.5px;
+      padding: 5px;
+      display: flex;
+      font-size: $text-base-size * 1.5;
+      flex-direction: column;
+      max-height: 60vh;
+      overflow: auto;
+    }
+    .c-list-categories {
+      border-radius: 5px;
+      margin-left: 2.5px;
+      padding: 5px;
+      display: flex;
+      font-size: $text-base-size * 1.5;
+      flex-direction: column;
+      max-height: 60vh;
+      overflow: auto;
+    }
+    .c-actions {
+      border-radius: 5px;
+      padding: 5px;
+      margin-left: 5px;
+      display: flex;
+      flex-direction: column;
+      max-height: 60vh;
+      overflow: auto;
+      .action-add {
+        border-radius: 5px;
+        padding: 5px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        .add-input {
+          display: flex;
+          flex-direction: row;
+        }
+      }
+      .action-edit {
+        border-radius: 5px;
+        padding: 5px;
+        width: 100%;
+        margin-top: 5px;
+        display: flex;
+        flex-direction: column;
+      }
+      .action-delete {
+        border-radius: 5px;
+        padding: 5px;
+        width: 100%;
+        margin-top: 5px;
+      }
+      .action-error-message {
+        border-radius: 5px;
+        padding: 5px;
+        width: 100%;
+        margin-top: 5px;
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+.question-pool {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.pool-category {
+  display: flex;
+  flex-direction: row;
+}
+
+.category-questions {
+  display: flex;
+  flex-direction: row;
+}

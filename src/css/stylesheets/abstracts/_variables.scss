@@ -1,0 +1,53 @@
+// font
+$font-primary: Helvetica, sans-serif;
+
+// font size
+$text-base-size: 1em;
+$text-admin-btn-size: 2em;
+
+// colors
+$correct: lightgreen;
+$incorrect: lightpink;
+$darkblue: #2a4d69;
+$lightblue: #adcbe3;
+$whiteblue: #e7eff6;
+$white: whitesmoke;
+$black: black;
+$gray: gray;
+$lightgray: lightgray;
+
+// light theme colors
+$font-primary-color-light: $white;
+$header-bg-color-light: $darkblue;
+$page-bg-color-light: $whiteblue;
+$footer-bg-color-light: $darkblue;
+$border1-color-light: $darkblue;
+$mc-ans-btn-hover-light: $lightblue;
+$option-color-light: $darkblue;
+$option-hover-light: $lightblue;
+$option-text-light: $white;
+$popup-bg-color-light: $whiteblue;
+$bg-1-color-light: $darkblue;
+$bg-1-font-color-light: $white;
+$bg-2-color-light: $lightblue;
+$bg-2-font-color-light: $white;
+$bg-3-color-light: $whiteblue;
+$bg-3-font-color-light: $black;
+
+// dark theme colors
+$font-primary-color-dark: $white;
+$header-bg-color-dark: $black;
+$page-bg-color-dark: $lightgray;
+$footer-bg-color-dark: $black;
+$border1-color-dark: $black;
+$mc-ans-btn-hover-dark: $gray;
+$option-color-dark: $black;
+$option-hover-dark: $gray;
+$option-text-dark: $white;
+$popup-bg-color-dark: $lightgray;
+$bg-1-color-dark: $black;
+$bg-1-font-color-dark: $white;
+$bg-2-color-dark: $gray;
+$bg-2-font-color-dark: $white;
+$bg-3-color-dark: $lightgray;
+$bg-3-font-color-dark: $black;

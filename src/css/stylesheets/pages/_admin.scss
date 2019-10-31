@@ -1,0 +1,17 @@
+.admin-page {
+  display: flex;
+  width: 100%;
+  .options {    
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 80%;
+    .option {
+      padding: 5vw;
+      border-radius: 5px;
+      margin: 10px;
+      text-decoration: none;
+      font-size: $text-admin-btn-size;
+    }
+  }
+}

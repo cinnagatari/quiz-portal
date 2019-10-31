@@ -1,0 +1,44 @@
+@charset 'UTF-8';
+
+// 1. Configuration and helpers
+@import
+  'stylesheets/abstracts/variables.scss',
+  'stylesheets/abstracts/animations';
+//   'abstracts/functions',
+//   'abstracts/mixins';
+
+// 2. Vendors
+@import
+  'stylesheets/vendors/aceEditor';
+
+// 3. Base stuff
+@import
+  'stylesheets/base/base';
+
+// 4. Layout-related sections
+@import
+  'stylesheets/layout/app',
+  'stylesheets/layout/header',
+  'stylesheets/layout/footer',
+  'stylesheets/layout/page';
+
+// 5. Components
+@import
+  'stylesheets/components/button',
+  'stylesheets/components/border',
+  'stylesheets/components/link',
+  'stylesheets/components/popup',
+  'stylesheets/components/question';
+
+// 6. Page-specific styles
+@import
+  'stylesheets/pages/home',
+  'stylesheets/pages/admin',
+  'stylesheets/pages/questionPool',
+  'stylesheets/pages/questionEditor',
+  'stylesheets/pages/categoryEditor';
+
+// 7. Themes
+@import
+  'stylesheets/themes/light',
+  'stylesheets/themes/dark';

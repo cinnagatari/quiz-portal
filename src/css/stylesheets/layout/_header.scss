@@ -1,0 +1,49 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  height: 50px;
+  font-family: $font-primary;
+}
+
+.main-logo {
+  margin-left: 5px;
+  margin-right: 5px;
+  height: 40px;
+}
+
+.title {
+  flex-grow: 1;
+  font-weight: bold;
+  color: whitesmoke;
+  text-decoration: none;
+  text-align: left;
+  font-size: $text-base-size * 2.5;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: row;
+}
+
+.nav-link {
+  font-size: $text-base-size * 2;
+}
+
+.login {
+  display: flex;
+  flex-direction: row;
+}
+
+.login-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.logout {
+  border: none;
+  background-color: transparent;
+  font-size: $text-base-size * 2;
+  color: whitesmoke;
+  text-decoration: none;
+  padding: 15px;
+}
