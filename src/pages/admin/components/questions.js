@@ -266,7 +266,7 @@ export default function Questions() {
         <div className="section-btns">
           {sections.map((s, i) => (
             <button
-              className={"btn-medium btn-" + user.theme}
+              className={"btn-medium btn-" + user.theme + (i === currentS ? " btn-selected-" + user.theme : "")}
               key={s + i}
               onClick={() => {
                 setCurrentS(currentS !== i ? i : -1);
@@ -289,7 +289,7 @@ export default function Questions() {
             (c, i) =>
               c.substring(0, c.indexOf("-")) === sections[currentS] && (
                 <button
-                  className={"btn-small btn-" + user.theme}
+                  className={"btn-small btn-" + user.theme + (i === currentC ? " btn-selected-" + user.theme : "")}
                   onClick={() => {
                     setCurrentC(currentC === i ? -1 : i);
                     setCurrentQ(-1);
@@ -315,7 +315,7 @@ export default function Questions() {
           {questions.map((q, i) => {
             return q.category === categories[currentC] ? (
               <button
-                className={"btn-small btn-" + user.theme}
+                className={"btn-small btn-" + user.theme + (i === currentQ ? " btn-selected-" + user.theme : "")}
                 key={q.name + i}
                 onClick={() => {
                   setCurrentQ(currentQ !== i ? i : -1);
@@ -606,18 +606,19 @@ export function EditCategories({
       </div>
       <div className="c-container">
         <div className={"c-list-sections bg-2-" + user.theme}>
-          <p>Section</p>
+          <p style={{alignSelf: 'center'}}>Section</p>
           {sections.map((s, i) => (
-            <button key={"section:" + s} onClick={() => setCurrentS(i)}>
+            <button key={"section:" + s} className={"btn-xsmall bg-3-" + user.theme + (i === currentS ? " btn-selected-" + user.theme : "")} onClick={() => setCurrentS(i)}>
               {s}
             </button>
           ))}
         </div>
         <div className={"c-list-categories bg-2-" + user.theme}>
-          <p>Category</p>
+          <p style={{alignSelf: 'center'}}>Category</p>
           {categories.map((c, i) => {
             return sections[currentS] === c.substring(0, c.indexOf("-")) ? (
               <button
+                className={"btn-xsmall bg-3-" + user.theme + (i === currentC ? " btn-selected-" + user.theme : "")}
                 key={c + i}
                 onClick={() => {
                   deleteState === 0
@@ -650,6 +651,7 @@ export function EditCategories({
             <div className="center add-input">
               <div style={{ display: "flex", flexDirection: "row" }}>
                 <input
+                  className="inp-2"
                   placeholder="name (letters only)"
                   value={addCat}
                   onChange={ev => {
@@ -666,6 +668,7 @@ export function EditCategories({
                   }}
                 />
                 <input
+                  className="inp-2"
                   placeholder="number"
                   value={addCatNum}
                   onChange={ev =>
@@ -676,6 +679,7 @@ export function EditCategories({
                 />
               </div>
               <button
+                className={"btn-small bg-3-" + user.theme}
                 onClick={() => {
                   if (
                     !cats.includes(addCat + "-" + addCatNum) &&
@@ -714,6 +718,7 @@ export function EditCategories({
               )}
               <div style={{ display: "flex", flexDirection: "row" }}>
                 <input
+                  className="inp-2"
                   placeholder="name (letters only)"
                   value={editCat}
                   onChange={ev => {
@@ -732,6 +737,7 @@ export function EditCategories({
                   }}
                 />
                 <input
+                  className="inp-2"
                   placeholder="number"
                   value={editCatNum}
                   onChange={ev =>
@@ -742,6 +748,7 @@ export function EditCategories({
                 />
 
                 <button
+                  className={"btn-small bg-3-" + user.theme}
                   onClick={() => {
                     if (editCat.length === 0 || editCatNum.length === 0) {
                       setEditState(-1);
@@ -765,7 +772,7 @@ export function EditCategories({
                   {editState === 1 ? "confirm" : "edit"}
                 </button>
                 {editState === 1 && (
-                  <button onClick={() => setEditState(0)}>cancel</button>
+                  <button className={"btn-small bg-3-" + user.theme} onClick={() => setEditState(0)}>cancel</button>
                 )}
               </div>
             </div>
@@ -778,7 +785,7 @@ export function EditCategories({
               <p className="c-subtitle">Delete {cats[currentC]}</p>
               <div>
                 {deleteState === 0 && (
-                  <button onClick={() => setDeleteState(1)}>delete</button>
+                  <button className={"btn-small bg-3-" + user.theme} onClick={() => setDeleteState(1)}>delete</button>
                 )}
                 {deleteState === 1 && (
                   <div
@@ -787,8 +794,8 @@ export function EditCategories({
                   >
                     <p>Assign to another category for affected questions?</p>
                     <div className="center">
-                      <button onClick={() => setDeleteState(2)}>yes</button>
-                      <button onClick={() => setDeleteState(3)}>no</button>
+                      <button className={"btn-small bg-3-" + user.theme} onClick={() => setDeleteState(2)}>yes</button>
+                      <button className={"btn-small bg-3-" + user.theme} onClick={() => setDeleteState(3)}>no</button>
                     </div>
                   </div>
                 )}
@@ -804,6 +811,7 @@ export function EditCategories({
                       <p>Select an existing category</p>
                       {newC !== -1 && <p>Selected: {cats[newC]}</p>}
                       <button
+                        className={"btn-small bg-3-" + user.theme}
                         onClick={() => {
                           setDeleteState(3);
                           setNewCat(cats[newC]);
@@ -834,6 +842,7 @@ export function EditCategories({
                       )}
                       <div style={{ display: "flex", flexDirection: "row" }}>
                         <input
+                          className="inp-2"
                           placeholder="name (letters only)"
                           value={newName}
                           onChange={ev => {
@@ -856,6 +865,7 @@ export function EditCategories({
                           }}
                         />
                         <input
+                          className="inp-2"
                           placeholder="number"
                           value={newNumber}
                           onChange={ev =>
@@ -867,6 +877,7 @@ export function EditCategories({
                           }
                         />
                         <button
+                          className={"btn-small bg-3-" + user.theme}
                           onClick={() => {
                             if (
                               newName.length > 0 &&
@@ -900,6 +911,7 @@ export function EditCategories({
                     </p>
                     <div>
                       <button
+                        className={"btn-small bg-3-" + user.theme}
                         onClick={() => {
                           setDeleteState(0);
                           deleteC(cats[currentC], newCat);
@@ -910,6 +922,7 @@ export function EditCategories({
                         confirm
                       </button>
                       <button
+                        className={"btn-small bg-3-" + user.theme}
                         onClick={() => {
                           setDeleteState(0);
                           setNewCat("no category");
@@ -931,7 +944,7 @@ export function EditCategories({
               style={{ display: "flex", flexDirection: "column" }}
             >
               <p>{errorMessage}</p>
-              <button onClick={() => setErrorMessage("")}>ok</button>
+              <button className={"btn-small bg-3-" + user.theme}onClick={() => setErrorMessage("")}>ok</button>
             </div>
           )}
         </div>

@@ -154,16 +154,17 @@ export default function QuestionEditor({
   }
 
   function setLength(len) {
+    console.log(len);
     let temp = { ...answers };
-    temp[LANGUAGES[lang] + "-length"] = len;
+    let tempLen = temp[LANGUAGES[lang]].length;
     if (len > temp[LANGUAGES[lang]].length) {
-      for (let i = 0; i < len - temp[LANGUAGES[lang]].length; i++) {
+      for (let i = 0; i < len - tempLen; i++) {
         temp[LANGUAGES[lang]].push("");
       }
     } else {
       temp[LANGUAGES[lang]] = temp[LANGUAGES[lang]].splice(0, len);
     }
-
+    temp[LANGUAGES[lang] + "-length"] = len;
     setAnswers(temp);
   }
 
@@ -260,6 +261,7 @@ export default function QuestionEditor({
               undefined
             )}
           <input
+            className="inp-1"
             placeholder="name"
             type="text"
             value={name}
@@ -273,6 +275,7 @@ export default function QuestionEditor({
               undefined
             )}
           <select
+            className="sel-1"
             value={category}
             onChange={ev => setCategory(ev.target.value)}
           >
@@ -291,6 +294,7 @@ export default function QuestionEditor({
               undefined
             )}
           <select
+            className="sel-1"
             value={difficulty}
             onChange={ev => setDifficulty(parseInt(ev.target.value, 10))}
           >
@@ -310,7 +314,7 @@ export default function QuestionEditor({
             )}
           {LANGUAGES.map((l, i) => (
             <button
-              className={"btn-icon " + (l ? "btn-selected-" + user.theme : "")}
+              className={"btn-icon " + (languages[i] ? "btn-selected-" + user.theme : "")}
               key={"toggle-languages-" + i}
               onClick={() => toggleLanguage(i)}
             >
@@ -345,7 +349,7 @@ export default function QuestionEditor({
                         )
                     )}
                   </div>
-                  <button onClick={() => setAllQuestions()}>
+                  <button className={"btn-small bg-3-" + user.theme} onClick={() => setAllQuestions()}>
                     apply question to all languages
                   </button>
                 </div>
@@ -376,12 +380,12 @@ export default function QuestionEditor({
               <div className="center answer">
                 <div className="type">
                   <div>
-                    <button onClick={() => setType("mc")}>
+                    <button className={"btn-small bg-3-" + user.theme + (type === "mc" ? " btn-selected-" + user.theme : "")} onClick={() => setType("mc")}>
                       Multiple Choice
                     </button>
-                    <button onClick={() => setType("sa")}>Free Reponse</button>
+                    <button className={"btn-small bg-3-" + user.theme + (type === "sa" ? " btn-selected-" + user.theme : "")} onClick={() => setType("sa")}>Free Reponse</button>
                   </div>
-                  <button onClick={() => setAllAnswers()}>
+                  <button className={"btn-small bg-3-" + user.theme} onClick={() => setAllAnswers()}>
                     apply answer to all languages
                   </button>
                 </div>
@@ -396,7 +400,7 @@ export default function QuestionEditor({
                       theme="github"
                       fontSize="18px"
                       showPrintMargin={false}
-                      style={{ height: "200px", width: "80%" }}
+                      style={{ height: "200px", width: "80%", borderRadius: '10px' }}
                       editorProps={{
                         $blockScrolling: Infinity
                       }}
@@ -408,7 +412,7 @@ export default function QuestionEditor({
                         justifyContent: "flex-end"
                       }}
                     >
-                      <button onClick={() => setAllPlaceholders()}>
+                      <button className={"btn-small bg-3-" + user.theme} onClick={() => setAllPlaceholders()}>
                         apply placeholder to all languages
                       </button>
                     </div>
@@ -421,7 +425,7 @@ export default function QuestionEditor({
                       theme="github"
                       fontSize="18px"
                       showPrintMargin={false}
-                      style={{ height: "200px", width: "80%" }}
+                      style={{ height: "200px", width: "80%", borderRadius: '10px' }}
                       editorProps={{ $blockScrolling: Infinity }}
                     />
                   </div>
@@ -429,7 +433,7 @@ export default function QuestionEditor({
                 {type === "mc" && (
                   <div className="mc-container">
                     <select
-                      className="length"
+                      className="length sel-2"
                       value={answers[LANGUAGES[lang] + "-length"]}
                       onChange={ev => setLength(ev.target.value)}
                     >
@@ -440,7 +444,7 @@ export default function QuestionEditor({
                       ))}
                     </select>
                     {answers[LANGUAGES[lang]].map((a, i) => (
-                      <div className="choice-container">
+                      <div key={LANGUAGES[lang] + "-answer-" + i} className="choice-container">
                         <AceEditor
                           key={LANGUAGES[lang] + "-answer-" + i}
                           placeholder={
@@ -449,7 +453,8 @@ export default function QuestionEditor({
                           style={{
                             minHeight: "50px",
                             width: "100%",
-                            backgroundColor: i === 0 ? "lightgreen" : ""
+                            backgroundColor: i === 0 ? "lightgreen" : "",
+                            borderRadius: '10px'
                           }}
                           value={a}
                           onChange={ev => onChangeAnswers(ev, i)}
@@ -471,7 +476,7 @@ export default function QuestionEditor({
             )}
 
             <div className="center" style={{ width: "80%" }}>
-              <button className="editor-submit" onClick={() => submit()}>
+              <button className={"editor-submit btn-medium bg-3-" + user.theme} onClick={() => submit()}>
                 {mode}
               </button>
             </div>
@@ -481,8 +486,15 @@ export default function QuestionEditor({
           <div
             className={"center question-preview bg-2-" + user.theme}
           >
-            <p className="preview-title">Preview</p>
-            <p className="preview-id">{name}</p>
+            <div className={"center p-container bg-1-" + user.theme}>
+              <p className="preview-title">Preview</p>
+              <FontAwesomeIcon style={{
+                height: '30px',
+                width: '30px',
+                margin: '5px'
+              }} className="icon" icon={ICONS[LANGUAGES.indexOf(LANGUAGES[lang])]} />
+              <p className="preview-id">{name}</p>
+            </div>
             <Question
               id={name}
               preview={true}

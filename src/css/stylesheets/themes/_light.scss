@@ -16,7 +16,7 @@
 .mc-ans-btn-light {
   transition: background-color 1s;
   &:hover {
-    background-color: $mc-ans-btn-hover-light;
+    background-color: $bg-3-color-light;
     animation: btn-pulse-light 2s infinite;
   }
 }
@@ -36,6 +36,11 @@
 }
 
 .btn-selected-light {
+  background-color: $btn-bg-dark;
+  box-shadow: 0px 0px 3px 3px $darkblue;
+}
+
+.btn-selected-anim-light {
   background-color: $btn-bg-light;
   animation: btn-pulse-light 2s infinite;
 }

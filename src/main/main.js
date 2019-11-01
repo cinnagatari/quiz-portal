@@ -31,7 +31,8 @@ export default function Main() {
         setLoading,
         classes,
         setClasses,
-        theme
+        theme,
+        setTheme
       }}
     >
       <div className="app">
@@ -44,8 +45,6 @@ export default function Main() {
             />
           </Link>
           <p className="title">Quiz Portal</p>
-          <button onClick={() => setTheme("light")}>Light</button>
-          <button onClick={() => setTheme("dark")}>Dark</button>
           <NavHead />
         </div>
         <div className={"center page bg-3-" + theme}>

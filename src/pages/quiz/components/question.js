@@ -47,7 +47,7 @@ export default function Question({
             theme="github"
             fontSize="18px"
             showPrintMargin={false}
-            style={{ height: "200px", width: "80%" }}
+            style={{ maxHeight: "330px", width: "80%", borderRadius: '10px' }}
             editorProps={{
               $blockScrolling: Infinity
             }}
@@ -59,7 +59,7 @@ export default function Question({
         {type === "mc" && (
           <div className="center mc-container">
             {answer.map((a, i) => (
-              <button className={"mc-ans-btn mc-ans-btn-" + user.theme}>
+              <button key={"final-mc" + id + i} className={"mc-ans-btn mc-ans-btn-" + user.theme}>
                 <AceEditor
                   key={"final-mc" + id + i}
                   value={a}

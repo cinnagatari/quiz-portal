@@ -1,0 +1,14 @@
+select {
+  border: none;
+  font-family: $font-primary;
+}
+
+.sel-1 {
+    border-radius: 10px;
+    font-size: $text-base-size * 1.5;
+}
+
+.sel-2 {
+    border-radius: 10px;
+    font-size: $text-base-size * 1.2;
+}
