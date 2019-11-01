@@ -35,20 +35,20 @@ export default function Main() {
       }}
     >
       <div className="app">
-        <div className={"center header header-" + theme}>
-          <img
-            className="center main-logo"
-            src="https://s3-us-west-2.amazonaws.com/static.irvinecode.net/v1/imgs/logo_top.png"
-            alt="logo"
-          />
-          <Link className="title" to="/">
-            <p>Quiz Portal</p>
+        <div className={"center header bg-1-" + theme}>
+          <Link to="/">
+            <img
+              className="center main-logo"
+              src="https://s3-us-west-2.amazonaws.com/static.irvinecode.net/v1/imgs/logo_top.png"
+              alt="logo"
+            />
           </Link>
+          <p className="title">Quiz Portal</p>
           <button onClick={() => setTheme("light")}>Light</button>
           <button onClick={() => setTheme("dark")}>Dark</button>
           <NavHead />
         </div>
-        <div className={"center page page-" + theme}>
+        <div className={"center page bg-3-" + theme}>
           {loggedIn && (
             <Switch>
               <Route path="/admin/questions" component={Questions} />
@@ -60,7 +60,7 @@ export default function Main() {
             </Switch>
           )}
         </div>
-        <div className={"center footer footer-" + theme}>
+        <div className={"center footer bg-1-" + theme}>
           <NavFoot />
         </div>
       </div>

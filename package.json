@@ -5,6 +5,11 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/free-brands-svg-icons": "^5.11.2",
+    "@fortawesome/free-regular-svg-icons": "^5.11.2",
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
+    "@fortawesome/react-fontawesome": "^0.1.7",
     "firebase": "7.0.0",
     "firebase-admin": "7.0.0",
     "local-storage": "2.0.0",
@@ -16,7 +21,8 @@
     "react-router-dom": "5.1.0",
     "react-scripts": "3.0.1",
     "react-simplemde-editor": "4.1.0",
-    "react-time": "4.3.0"
+    "react-time": "4.3.0",
+    "save": "^2.4.0"
   },
   "devDependencies": {
     "typescript": "3.3.3"

@@ -45,11 +45,14 @@ export default function Question({
             value={answer}
             mode={language}
             theme="github"
-            fontSize="14px"
+            fontSize="18px"
             showPrintMargin={false}
             style={{ height: "200px", width: "80%" }}
             editorProps={{
               $blockScrolling: Infinity
+            }}
+            setOptions={{
+              readOnly: preview
             }}
           />
         )}
@@ -62,7 +65,7 @@ export default function Question({
                   value={a}
                   mode={language}
                   theme="github"
-                  fontSize="14px"
+                  fontSize="18px"
                   showPrintMargin={false}
                   style={{
                     minHeight: "50px",

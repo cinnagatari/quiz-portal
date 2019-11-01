@@ -1,17 +1,16 @@
-.header-light {
-  background-color: $header-bg-color-light;
+.bg-1-light {
+  background-color: $bg-1-color-light;
+  color: $bg-1-font-color-light;
 }
 
-.page-light {
-  background-color: $page-bg-color-light;
+.bg-2-light {
+  background-color: $bg-2-color-light;
+  color: $bg-2-font-color-light;
 }
 
-.footer-light {
-  background-color: $footer-bg-color-light;
-}
-
-.border1-light {
-  border-color: $border1-color-light; 
+.bg-3-light {
+  background-color: $bg-3-color-light;
+  color: $bg-3-font-color-light;
 }
 
 .mc-ans-btn-light {
@@ -32,21 +31,11 @@
   }
 }
 
-.popup-light {
-  background-color: $popup-bg-color-light;
+.btn-light {
+  background-color: $btn-bg-light;
 }
 
-.bg-1-light {
-  background-color: $bg-1-color-light;
-  color: $bg-1-font-color-light;
-}
-
-.bg-2-light {
-  background-color: $bg-2-color-light;
-  color: $bg-2-font-color-light;
-}
-
-.bg-3-light {
-  background-color: $bg-3-color-light;
-  color: $bg-3-font-color-light;
+.btn-selected-light {
+  background-color: $btn-bg-light;
+  animation: btn-pulse-light 2s infinite;
 }

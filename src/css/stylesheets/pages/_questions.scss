@@ -14,7 +14,6 @@
       flex: 1;
       font-size: $text-base-size * 2.5;
     }
-
     .section-btns {
       flex: 7;
       flex-wrap: wrap;
@@ -37,6 +36,7 @@
       border-radius: 5px;
       margin-bottom: 5px;
       font-size: $text-base-size * 1.1;
+      border: none;
     }
     .category-btns {
       flex: 7;
@@ -61,12 +61,14 @@
       border-radius: 5px;
       margin-bottom: 5px;
       font-size: $text-base-size * 1.1;
+      border: none;
     }
 
     .delete-question {
       border-radius: 5px;
       margin-bottom: 5px;
       font-size: $text-base-size * 0.9;
+      border: none;
     }
 
     .question-btns {

@@ -7,7 +7,7 @@ export default function Popup({ closePopup, contents }) {
   return (
     <div className="center">
       <div onClick={() => closePopup(false)} className="center popup-bg" />
-      <div className={"center popup popup-" + user.theme}>{contents}</div>
+      <div className={"center popup bg-3-" + user.theme}>{contents}</div>
     </div>
   );
 }

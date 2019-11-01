@@ -266,7 +266,7 @@ export default function Questions() {
         <div className="section-btns">
           {sections.map((s, i) => (
             <button
-              className="section-btn"
+              className={"btn-medium btn-" + user.theme}
               key={s + i}
               onClick={() => {
                 setCurrentS(currentS !== i ? i : -1);
@@ -282,14 +282,14 @@ export default function Questions() {
       <div className={"q-categories bg-2-" + user.theme}>
         <div style={{ display: 'flex', flexDirection: "column" }} className="center">
           <p className={"center q-category-title bg-1-" + user.theme}>Categories</p>
-          <button className="edit-category" onClick={() => setEditCat(true)}>Edit Categories</button>
+          <button className={"edit-category btn-" + user.theme} onClick={() => setEditCat(true)}>Edit Categories</button>
         </div>
         <div className={"category-btns"}>
           {categories.map(
             (c, i) =>
               c.substring(0, c.indexOf("-")) === sections[currentS] && (
                 <button
-                  className="category-btn"
+                  className={"btn-small btn-" + user.theme}
                   onClick={() => {
                     setCurrentC(currentC === i ? -1 : i);
                     setCurrentQ(-1);
@@ -305,17 +305,17 @@ export default function Questions() {
       <div className={"q-questions bg-2-" + user.theme}>
         <div className="center" style={{ display: 'flex', flexDirection: "column" }}>
           <p className={"center q-question-title bg-1-" + user.theme}>Questions</p>
-          <button className="center add-question" onClick={() => {
+          <button className={"center add-question btn-" + user.theme} onClick={() => {
             setAdding(true);
             setCurrentQ(-1);
           }}>Add Question</button>
-          {currentQ !== -1 && <button className="center delete-question" onClick={() => deleteQ(questions[currentQ])}>Delete Question</button>}
+          {currentQ !== -1 && <button className={"center delete-question btn-" + user.theme} onClick={() => deleteQ(questions[currentQ])}>Delete Question</button>}
         </div>
         <div>
           {questions.map((q, i) => {
             return q.category === categories[currentC] ? (
               <button
-                className="question-btn"
+                className={"btn-small btn-" + user.theme}
                 key={q.name + i}
                 onClick={() => {
                   setCurrentQ(currentQ !== i ? i : -1);

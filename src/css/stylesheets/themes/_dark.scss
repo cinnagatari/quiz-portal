@@ -1,17 +1,16 @@
-.header-dark {
-  background-color: $header-bg-color-dark;
+.bg-1-dark {
+  background-color: $bg-1-color-dark;
+  color: $bg-1-font-color-dark;
 }
 
-.page-dark {
-  background-color: $page-bg-color-dark;
+.bg-2-dark {
+  background-color: $bg-2-color-dark;
+  color: $bg-2-font-color-dark;
 }
 
-.footer-dark {
-  background-color: $footer-bg-color-dark;
-}
-
-.border1-dark {
-  border-color: $border1-color-dark;
+.bg-3-dark {
+  background-color: $bg-3-color-dark;
+  color: $bg-3-font-color-dark;
 }
 
 .mc-ans-btn-dark {
@@ -32,21 +31,11 @@
   }
 }
 
-.popup-dark {
-  background-color: $popup-bg-color-dark;
+.btn-dark {
+  background-color: $btn-bg-dark;
 }
 
-.bg-1-dark {
-  background-color: $bg-1-color-dark;
-  color: $bg-1-font-color-dark;
-}
-
-.bg-2-dark {
-  background-color: $bg-2-color-dark;
-  color: $bg-2-font-color-dark;
-}
-
-.bg-3-dark {
-  background-color: $bg-3-color-dark;
-  color: $bg-3-font-color-dark;
+.btn-selected-dark {
+  background-color: $btn-bg-dark;
+  animation: btn-pulse-dark 2s infinite;
 }

@@ -10,8 +10,11 @@ import "brace/theme/dracula";
 import "brace/theme/github";
 import UserContext from "../../../utils/userContext";
 import Question from "../../quiz/components/question";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faJava, faPython, faJs } from '@fortawesome/free-brands-svg-icons'
 
 const LANGUAGES = ["java", "python", "javascript"];
+const ICONS = [faJava, faPython, faJs];
 
 export default function QuestionEditor({
   update,
@@ -249,13 +252,13 @@ export default function QuestionEditor({
           {submitFailed && name.length === 0 ? (
             <p>Please Enter A Name</p>
           ) : (
-            undefined
-          )}
+              undefined
+            )}
           {submitFailed && names.includes(name) ? (
             <p>Name is taken</p>
           ) : (
-            undefined
-          )}
+              undefined
+            )}
           <input
             placeholder="name"
             type="text"
@@ -267,8 +270,8 @@ export default function QuestionEditor({
           {submitFailed && category === -1 ? (
             <p>Please Select A Category</p>
           ) : (
-            undefined
-          )}
+              undefined
+            )}
           <select
             value={category}
             onChange={ev => setCategory(ev.target.value)}
@@ -285,8 +288,8 @@ export default function QuestionEditor({
           {submitFailed && difficulty === -1 ? (
             <p>Please Select A Difficulty</p>
           ) : (
-            undefined
-          )}
+              undefined
+            )}
           <select
             value={difficulty}
             onChange={ev => setDifficulty(parseInt(ev.target.value, 10))}
@@ -303,14 +306,15 @@ export default function QuestionEditor({
           {submitFailed && lang === -1 ? (
             <p>Please Select A Language</p>
           ) : (
-            undefined
-          )}
+              undefined
+            )}
           {LANGUAGES.map((l, i) => (
             <button
+              className={"btn-icon " + (l ? "btn-selected-" + user.theme : "")}
               key={"toggle-languages-" + i}
               onClick={() => toggleLanguage(i)}
             >
-              {l}
+              <FontAwesomeIcon className="icon" icon={ICONS[i]} />
             </button>
           ))}
         </div>
@@ -323,21 +327,22 @@ export default function QuestionEditor({
                 {submitFailed && checkQuestion() ? (
                   <p>check questions</p>
                 ) : (
-                  undefined
-                )}
+                    undefined
+                  )}
                 <div className="type">
                   <div>
                     {languages.map((l, i) =>
                       l ? (
                         <button
+                          className={"btn-icon " + (lang === i ? "btn-selected-" + user.theme : "")}
                           key={"languages-" + i}
                           onClick={() => setLang(i)}
                         >
-                          {LANGUAGES[i]}
+                          <FontAwesomeIcon className="icon" icon={ICONS[i]} />
                         </button>
                       ) : (
-                        undefined
-                      )
+                          undefined
+                        )
                     )}
                   </div>
                   <button onClick={() => setAllQuestions()}>
@@ -365,8 +370,8 @@ export default function QuestionEditor({
             {submitFailed && checkSolution() && checkAnswers() ? (
               <p>please check answers</p>
             ) : (
-              undefined
-            )}
+                undefined
+              )}
             {Object.keys(solution).length !== 0 && lang !== -1 && (
               <div className="center answer">
                 <div className="type">
@@ -389,7 +394,7 @@ export default function QuestionEditor({
                       value={solution[LANGUAGES[lang]]}
                       onChange={onChangeSolution}
                       theme="github"
-                      fontSize="14px"
+                      fontSize="18px"
                       showPrintMargin={false}
                       style={{ height: "200px", width: "80%" }}
                       editorProps={{
@@ -414,7 +419,7 @@ export default function QuestionEditor({
                       onChange={onChangePlaceholder}
                       mode={LANGUAGES[lang]}
                       theme="github"
-                      fontSize="14px"
+                      fontSize="18px"
                       showPrintMargin={false}
                       style={{ height: "200px", width: "80%" }}
                       editorProps={{ $blockScrolling: Infinity }}
@@ -451,6 +456,7 @@ export default function QuestionEditor({
                           mode={LANGUAGES[lang]}
                           theme="github"
                           maxLines={Infinity}
+                          fontSize="18px"
                           showPrintMargin={false}
                           setOptions={{
                             autoScrollEditorIntoView: false
