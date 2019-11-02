@@ -1,42 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../../utils/firebase";
+import { loadDB } from "../../../libraries/loadDB";
 
-export default function QuestionSets() {
-  let [questions, setQuestions] = useState([
-    {
-      question: "",
-      answers: [],
-      category: "",
-      difficulty: 1,
-      id: "",
-      language: "java",
-      type: "mc"
-    }
-  ]);
+const DEFAULT = [
+  {
+    name: "testSet",
+    questions: [],
+    timeLimit: {time: 7, type: "days"}
+  }
+]
+
+export default function QuestionSets({ questions, categories }) {
+  let [sets, setSets] = useState([]);
 
   useEffect(() => {
-    async function loadQuestions() {
-      let questions = [];
-      let qSS = await db.collection("questionPool").get();
-      qSS.docs.forEach(q => {
-        questions.push({
-          question: q.question,
-          answers: q.answers,
-          category: q.category,
-          difficulty: q.difficulty,
-          id: q.id,
-          language: q.language,
-          type: q.type
-        });
-      });
-      setQuestions(questions);
-    }
-    loadQuestions();
-  }, []);
+    loadDB.sets().then(v => setSets(v));
+  }, [])
+
+
+  console.log(sets);
 
   return (
-    <div>
-      <p>Question Sets</p>
+    <div className="set-editor">
+      <div className="sets">
+        <div>{sets}</div>
+      </div>
     </div>
   );
 }

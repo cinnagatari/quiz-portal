@@ -20,7 +20,7 @@ export default function Admin() {
           </Link>
           <Link
             className={"center option option-" + user.theme}
-            to="/admin/question-sets"
+            to="/admin/sets"
           >
             Edit Question Sets
           </Link>

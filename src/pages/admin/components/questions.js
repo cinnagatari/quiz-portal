@@ -3,6 +3,8 @@ import { db, firebase } from "../../../utils/firebase";
 import QuestionEditor from "./questionEditor";
 import Popup from "../../../main/components/popup";
 import UserContext from "../../../utils/userContext";
+import { loadDB, version } from "../../../libraries/loadDB";
+
 
 const DEFAULT = [
   {
@@ -167,73 +169,20 @@ export default function Questions() {
   }
 
   async function versionCheck() {
-    let vSS = await db
-      .collection("version")
-      .doc("versionCheck")
-      .get();
-    if (
-      vSS.data().questions !==
-      parseInt(localStorage.getItem("question-version"), 10)
-    ) {
-      localStorage.setItem(
-        "question-version",
-        JSON.stringify(vSS.data().questions)
-      );
-      await loadQuestions();
-    } else {
-      localQuestions();
-    }
-    if (
-      vSS.data().categories !==
-      parseInt(localStorage.getItem("category-version"), 10)
-    ) {
-      localStorage.setItem(
-        "category-version",
-        JSON.stringify(vSS.data().categories)
-      );
-      await loadCategories();
-    } else {
-      localCategories();
-    }
+    let versionState = "";
+    await version.check().then(v => versionState = v);
+    if (versionState.q === "load") loadQuestions();
+    else localQuestions();
+    if (versionState.c === "load") loadCategories();
+    else localCategories();
   }
 
   async function loadQuestions() {
-    let questions = [];
-    let ids = [];
-    let names = [];
-    let qSS = await db.collection("questions").get();
-    qSS.docs.forEach(q => {
-      questions.push({
-        question: q.data().question,
-        answers: q.data().answers,
-        category: q.data().category,
-        difficulty: q.data().difficulty,
-        name: q.data().name,
-        languages: q.data().languages,
-        type: q.data().type,
-        solution: q.data().solution,
-        placeholder: q.data().placeholder
-      });
-      names.push(q.data().name);
-    });
-    newData.q = { q: questions, n: names, id: ids };
-    setQuestions(questions);
-    setNames(names);
-    localStorage.setItem("all-questions", JSON.stringify(questions));
-    localStorage.setItem("all-names", JSON.stringify(names));
+    await loadDB.questions().then(questions => { setQuestions(questions.q); setNames(questions.n) });
   }
 
   async function loadCategories() {
-    let cSS = await db
-      .collection("fields")
-      .doc("category")
-      .get();
-    setCategories(cSS.data().categories.sort());
-    localStorage.setItem(
-      "categories",
-      JSON.stringify(cSS.data().categories.sort())
-    );
-    newData.c = cSS.data().categories.sort();
+    await loadDB.categories().then(categories => setCategories(categories));
   }
 
   function localCategories() {
@@ -606,7 +555,7 @@ export function EditCategories({
       </div>
       <div className="c-container">
         <div className={"c-list-sections bg-2-" + user.theme}>
-          <p style={{alignSelf: 'center'}}>Section</p>
+          <p style={{ alignSelf: 'center' }}>Section</p>
           {sections.map((s, i) => (
             <button key={"section:" + s} className={"btn-xsmall bg-3-" + user.theme + (i === currentS ? " btn-selected-" + user.theme : "")} onClick={() => setCurrentS(i)}>
               {s}
@@ -614,7 +563,7 @@ export function EditCategories({
           ))}
         </div>
         <div className={"c-list-categories bg-2-" + user.theme}>
-          <p style={{alignSelf: 'center'}}>Category</p>
+          <p style={{ alignSelf: 'center' }}>Category</p>
           {categories.map((c, i) => {
             return sections[currentS] === c.substring(0, c.indexOf("-")) ? (
               <button
@@ -944,7 +893,7 @@ export function EditCategories({
               style={{ display: "flex", flexDirection: "column" }}
             >
               <p>{errorMessage}</p>
-              <button className={"btn-small bg-3-" + user.theme}onClick={() => setErrorMessage("")}>ok</button>
+              <button className={"btn-small bg-3-" + user.theme} onClick={() => setErrorMessage("")}>ok</button>
             </div>
           )}
         </div>

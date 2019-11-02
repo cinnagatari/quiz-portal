@@ -16,7 +16,7 @@ export default function Main() {
   let [loggedIn, setLoggedIn] = useState(false);
   let [loading, setLoading] = useState(true);
   let [classes, setClasses] = useState([]);
-  let [theme, setTheme] = useState("light");
+  let [theme, setTheme] = useState("dark");
 
   return (
     <UserContext.Provider
