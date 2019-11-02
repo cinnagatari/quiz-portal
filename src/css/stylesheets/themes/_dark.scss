@@ -40,6 +40,11 @@
   box-shadow: 0px 0px 3px 3px $black; 
 }
 
+.btn-selected-2-dark {
+  background-color: $btn-bg-dark;
+  box-shadow: 0px 0px 3px 3px $white; 
+}
+
 .btn-selected-anim-dark {
   background-color: $btn-bg-dark;
   animation: btn-pulse-dark 2s infinite;

@@ -6,4 +6,27 @@
 
     }
     
+    .question-preview {
+        border-radius: 10px;
+        padding: 5px;
+        margin: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 50vw;
+        justify-content: flex-start;
+        .p-container {
+          display: flex;
+          flex-direction: row;
+          border-radius: 10px;
+          margin: 5px;
+          padding: 5px;
+          .preview-title {
+            font-size: $text-base-size * 2.5;
+          }  
+          .preview-id {
+            font-size: $text-base-size * 2.5; 
+          }
+        }
+        
+      }
 }

@@ -40,6 +40,11 @@
   box-shadow: 0px 0px 3px 3px $darkblue;
 }
 
+.btn-selected-2-light {
+  background-color: $btn-bg-light;
+  box-shadow: 0px 0px 3px 3px $white; 
+}
+
 .btn-selected-anim-light {
   background-color: $btn-bg-light;
   animation: btn-pulse-light 2s infinite;

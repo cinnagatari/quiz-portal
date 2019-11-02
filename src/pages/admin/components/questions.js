@@ -233,7 +233,7 @@ export default function Questions() {
       )}
       {editCat && (
         <Popup
-          closePopup={() => setEditCat(false)}
+          close={() => setEditCat(false)}
           contents={
             <EditCategories
               sections={sections}

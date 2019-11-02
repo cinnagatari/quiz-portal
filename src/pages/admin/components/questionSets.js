@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { db } from "../../../utils/firebase";
 import { version, loadDB, sets, question } from "../../../libraries/loadDB";
 import Popup from "../../../main/components/popup";
 import Question from "../../quiz/components/question";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faJava, faPython, faJs } from '@fortawesome/free-brands-svg-icons'
+import UserContext from "../../../utils/userContext";
+import Filter from "../../../libraries/filter";
 
-const LANGUAGES = [
-  "java",
-  "python",
-  "javascript"
-]
+const LANGUAGES = ["java", "python", "javascript"];
+const ICONS = [faJava, faPython, faJs];
 
 const TYPES = [
   "mc",
@@ -30,7 +31,8 @@ export default function QuestionSets() {
   let [upperDiff, setUpperDiff] = useState(10);
   let [currentSet, setCurrentSet] = useState("");
   let [currentQ, setCurrentQ] = useState("");
-  let [showPopup, setShowpopup] = useState(true);
+  let [showEditor, setShowEditor] = useState(false);
+  let user = useContext(UserContext);
 
   useEffect(() => {
     versionCheck();
@@ -38,7 +40,7 @@ export default function QuestionSets() {
 
   async function versionCheck() {
     let versionState = {};
-    await version.sets().then(version => versionState = version);
+    await version.check().then(version => versionState = version);
     if (versionState.s === "load") await loadDB.sets().then(sets => setSets(sets));
     else setSets(JSON.parse(localStorage.getItem("sets")));
     if (versionState.q === "load") await loadDB.questions().then(questions => setQuestions(questions));
@@ -62,10 +64,6 @@ export default function QuestionSets() {
     }
   }, [questions])
 
-  function updateFilter(value) {
-    setFilter(filter.includes(value) ? filter.filter(f => f !== value) : [...filter, value]);
-  }
-
   function checkFilter(set) {
     let cnt = 0;
     filter.forEach(f => {
@@ -75,53 +73,11 @@ export default function QuestionSets() {
     if ((type === "sa" && set.filter.includes("mc"))) cnt += 100;
     return cnt === filter.length;
   }
-  console.log(questions);
-  console.log(currentSet);
-  console.log(questions.length !== 0 ? questions[questions.map(q => q.name).indexOf("lengthZero")] : "");
-  console.log(currentQ);
+
   return (
     <div className="set-editor">
       <div>
-        <div>Filter</div>
-        {filter}
-        <div>
-          <p>Languages</p>
-          {LANGUAGES.map(l => <button onClick={() => updateFilter(l)}>{l}</button>)}
-        </div>
-        <div>
-          <p>Sections</p>
-          {sections.map((s, i) => <button onClick={() => setCurrentS(i)}>{s}</button>)}
-        </div>
-        <div>
-          <p>Categories</p>
-          {categories.map(c => {
-            if (sections[currentS] === c.substring(0, c.indexOf("-"))) {
-              return (<button onClick={() => {
-                updateFilter(c);
-                setSelectedCategories([...selectedCategories, c]);
-              }}>{c}</button>);
-            }
-          })}
-          <p>Selected Categories</p>
-          {selectedCategories.map(c => <button onClick={() => {
-            updateFilter(c);
-            setSelectedCategories(selectedCategories.filter(s => s !== c));
-          }}>{c}</button>)}
-        </div>
-        <div>
-          <p>Type</p>
-          {TYPES.map(t => <button onClick={() => setType(type !== t ? t : "none")}>{t}</button>)}
-        </div>
-        <div>
-          <p>Difficulty</p>
-          <p>Select Range</p>
-          <select key={'lower'} value={lowerDiff} onChange={ev => setLowerDiff(parseInt(ev.target.value), 10)}>
-            {DIFFICULTY.map(d => <option value={d}>{d}</option>)}
-          </select>
-          <select key={'upper'} value={upperDiff} onChange={ev => setUpperDiff(parseInt(ev.target.value), 10)}>
-            {new Array(DIFFICULTY.length + 1 - lowerDiff).fill(0).map((d, i) => lowerDiff + i).map((d, i) => <option value={d}>{d}</option>)}
-          </select>
-        </div>
+        <Filter newFilter={setFilter} newType={setType}/>
       </div>
       <div className="sets">
         <div>Sets</div>
@@ -136,18 +92,44 @@ export default function QuestionSets() {
           </div>
         }
       </div>
+      {showEditor && <EditSets questions={questions} sets={sets} setSets={setSets} mode={"add"} categories={categories} />}
+
       {currentQ !== "" && <Popup
         close={() => setCurrentQ("")}
-        contents={<Question
-          preview={true}
-          id={currentQ.name}
-          question={currentQ.question.java}
-          language={"java"}
-          type={currentQ.type}
-          answer={currentQ.type === "mc" ? currentQ.answers.java : currentQ.placeholder.java}
-        />}
+        contents={
+          <div className={"center question-preview bg-2-" + user.theme}>
+            <div className={"center p-container bg-1-" + user.theme}>
+              <p className="preview-title">Preview</p>
+              <FontAwesomeIcon style={{
+                height: '30px',
+                width: '30px',
+                margin: '5px'
+              }} className="icon" icon={ICONS[LANGUAGES.indexOf("java")]} />
+              <p className="preview-id">{currentQ.name}</p>
+            </div>
+            <Question
+              preview={true}
+              id={currentQ.name}
+              question={currentQ.question.java}
+              language={"java"}
+              type={currentQ.type}
+              answer={currentQ.type === "mc" ? currentQ.answers.java : currentQ.placeholder.java}
+            />
+          </div>
+        }
       />
       }
+    </div>
+  );
+}
+
+function EditSets({ questions, sets, setSets, mode, categories }) {
+
+  let [filter, setFilter] = useState([]);
+
+  return (
+    <div>
+      <Filter newFilter={setFilter} filteredCategories={categories} />
     </div>
   );
 }

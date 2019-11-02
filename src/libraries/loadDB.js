@@ -3,48 +3,22 @@ import { db, firebase } from "../utils/firebase";
 const version = {
 
     check: async function versionCheck() {
-        let versionState = { q: "local", c: "local" };
-        let vSS = await db
-            .collection("version")
-            .doc("versionCheck")
-            .get();
-        if (
-            vSS.data().questions !==
-            parseInt(localStorage.getItem("question-version"), 10)
-        ) {
-            localStorage.setItem(
-                "question-version",
-                JSON.stringify(vSS.data().questions)
-            );
-            versionState.q = "load";
-        }
-        if (
-            vSS.data().categories !==
-            parseInt(localStorage.getItem("category-version"), 10)
-        ) {
-            localStorage.setItem(
-                "category-version",
-                JSON.stringify(vSS.data().categories)
-            );
-            versionState.c = "load";
-        }
-        return versionState;
-    },
-
-    sets: async function versionCheck() {
-        let versionState = { q: "local", s: "local" };
+        let versionState = { q: "local", c: "local", s: "local" };
         let vSS = await db.collection("version").doc("versionCheck").get();
         if (vSS.data().questions !== parseInt(localStorage.getItem("question-version"), 10)) {
             localStorage.setItem("question-version", JSON.stringify(vSS.data().questions));
             versionState.q = "load";
+        }
+        if (vSS.data().categories !== parseInt(localStorage.getItem("category-version"), 10)) {
+            localStorage.setItem("category-version", JSON.stringify(vSS.data().categories));
+            versionState.c = "load";
         }
         if (vSS.data().sets !== parseInt(localStorage.getItem("set-version"), 10)) {
             localStorage.setItem("set-version", JSON.stringify(vSS.data().sets));
             versionState.s = "load";
         }
         return versionState;
-    }
-
+    },
 }
 
 const loadDB = {
@@ -92,14 +66,15 @@ const loadDB = {
         let sSS = await db.collection("sets").get();
         sSS.forEach(s => {
             let filter = [];
+            let languages = [];
             let difficulty = 0;
-            s.data().questions.forEach( q => {
-                if(!filter.includes(questions[names.indexOf(q)].category)) filter.push(questions[names.indexOf(q)].category);
-                if(!filter.includes(questions[names.indexOf(q)].type)) filter.push(questions[names.indexOf(q)].type);
-                questions[names.indexOf(q)].languages.forEach(l => {if(!filter.includes(l)) filter.push(l)});
+            s.data().questions.forEach(q => {
+                if (!filter.includes(questions[names.indexOf(q)].category)) filter.push(questions[names.indexOf(q)].category);
+                if (!filter.includes(questions[names.indexOf(q)].type)) filter.push(questions[names.indexOf(q)].type);
+                questions[names.indexOf(q)].languages.forEach(l => { if (!languages.includes(l)) languages.push(l) });
                 difficulty += questions[names.indexOf(q)].difficulty;
             })
-            sets.push({name: s.data().name, questions: s.data().questions, filter: filter, difficulty: difficulty});
+            sets.push({ name: s.data().name, questions: s.data().questions, filter: filter, languages: languages, difficulty: difficulty });
         })
 
         localStorage.setItem("sets", JSON.stringify(sets));
