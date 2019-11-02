@@ -3,7 +3,7 @@ import { db, firebase } from "../../../utils/firebase";
 import QuestionEditor from "./questionEditor";
 import Popup from "../../../main/components/popup";
 import UserContext from "../../../utils/userContext";
-import { loadDB, version } from "../../../libraries/loadDB";
+import { loadDB, version, category, question } from "../../../libraries/loadDB";
 
 
 const DEFAULT = [
@@ -43,10 +43,15 @@ export default function Questions() {
   let [addID, setAddID] = useState(0);
   let [reloadQ, setReloadQ] = useState(undefined);
   let [editCat, setEditCat] = useState(false);
+  let [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     versionCheck();
   }, []);
+
+  useEffect(() => {
+    setNames(questions.map(q => q.name));
+  }, [])
 
   useEffect(() => {
     let section = [];
@@ -61,111 +66,38 @@ export default function Questions() {
   }, [categories]);
 
   async function addQ(newQuestion) {
-    newData = { q: "", c: "" };
-    await versionCheck();
-    if (newData.q !== "" && newData.n.includes(newQuestion.name)) {
-      setReloadQ(newQuestion);
-    } else {
-      db.collection("questions")
-        .doc(newQuestion.name)
-        .set(newQuestion);
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({ questions: firebase.firestore.FieldValue.increment(1) });
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-      setQuestions([...questions, newQuestion]);
-      setNames([...names, newQuestion.name]);
-      setAdding(false);
-      localStorage.setItem(
-        "all-questions",
-        JSON.stringify([
-          ...JSON.parse(localStorage.getItem("all-questions")),
-          newQuestion
-        ])
-      );
-      localStorage.setItem(
-        "all-names",
-        JSON.stringify([
-          ...JSON.parse(localStorage.getItem("all-names")),
-          newQuestion.name
-        ])
-      );
-      setReloadQ(undefined);
-      setAddID(addID + 1);
-    }
+    await question.add(newQuestion).then(newQuestions => {
+      if (newQuestions.error !== undefined) {
+        setErrorMessage(newQuestions.error);
+        setReloadQ(newQuestion);
+      } else {
+        setAdding(false);
+        setAddID(addID + 1);
+      }
+      setQuestions(newQuestions.q);
+      setCategories(newQuestions.c);
+    })
   }
 
-  async function editQ(question, oName) {
-    newData = { q: "", c: "" };
-    await versionCheck();
-    let temp = [];
-    let tempNames = [];
-    if (newData.q !== "") {
-      temp = [...newData.q.q];
-      tempNames = [...names];
-    } else {
-      temp = [...questions];
-      tempNames = [...names];
-    }
-    temp[currentQ] = { ...question };
-    tempNames[currentQ] = question.name;
-    await db
-      .collection("version")
-      .doc("versionCheck")
-      .update({ questions: firebase.firestore.FieldValue.increment(1) });
-    localStorage.setItem(
-      "question-version",
-      parseInt(localStorage.getItem("question-version"), 10) + 1
-    );
-    if (question.name !== oName) {
-      db.collection("questions")
-        .doc(oName)
-        .delete();
-    }
-    db.collection("questions")
-      .doc(question.name)
-      .set(question);
-    setQuestions(temp);
-    setNames(tempNames);
-    localStorage.setItem("all-questions", JSON.stringify(temp));
-    localStorage.setItem("all-names", JSON.stringify(tempNames));
+  async function editQ(newQuestion, original) {
+    await question.edit(newQuestion, original).then(newQuestions => {
+      console.log(newQuestions);
+      if (newQuestions.error !== undefined)
+        setErrorMessage(newQuestions.error);
+      setQuestions(newQuestions.q);
+      setCategories(newQuestions.c);
+    })
   }
 
-  async function deleteQ(question) {
-    setCurrentQ(-1);
-    newData = { q: "", c: "" };
-    await versionCheck();
-    let temp = [];
-    let tempNames = [];
-    if (newData.q !== "") {
-      temp = [...newData.q.q];
-      tempNames = [...names];
-    } else {
-      temp = [...questions];
-      tempNames = [...names];
-    }
-    temp = temp.filter(q => question.name !== q.name);
-    tempNames = tempNames.filter(n => question.name !== n);
-    await db
-      .collection("version")
-      .doc("versionCheck")
-      .update({ questions: firebase.firestore.FieldValue.increment(1) });
-    localStorage.setItem(
-      "question-version",
-      parseInt(localStorage.getItem("question-version"), 10) + 1
-    );
-    db.collection("questions")
-      .doc(question.name)
-      .delete();
-    setQuestions(temp);
-    setNames(tempNames);
-    localStorage.setItem("all-questions", JSON.stringify(temp));
-    localStorage.setItem("all-names", JSON.stringify(tempNames));
-    setCurrentQ(-1);
+
+  async function deleteQ(original) {
+    await question.delete(original).then(newQuestions => {
+      if (newQuestions.error !== undefined)
+        setErrorMessage(newQuestions.error);
+      setQuestions(newQuestions.q);
+      setCategories(newQuestions.c);
+      setCurrentQ(-1);
+    })
   }
 
   async function versionCheck() {
@@ -178,7 +110,7 @@ export default function Questions() {
   }
 
   async function loadQuestions() {
-    await loadDB.questions().then(questions => { setQuestions(questions.q); setNames(questions.n) });
+    await loadDB.questions().then(questions => { setQuestions(questions) });
   }
 
   async function loadCategories() {
@@ -195,8 +127,8 @@ export default function Questions() {
   }
 
   function localQuestions() {
-    let names = JSON.parse(localStorage.getItem("all-names"));
-    let questions = JSON.parse(localStorage.getItem("all-questions"));
+    let names = JSON.parse(localStorage.getItem("questionNames"));
+    let questions = JSON.parse(localStorage.getItem("questions"));
     if (names === null || questions === null) {
       loadQuestions();
       loadCategories();
@@ -205,7 +137,7 @@ export default function Questions() {
       setQuestions(questions);
     }
   }
-
+  
   return (
     <div className="questions">
       <div className={"q-sections bg-2-" + user.theme}>
@@ -301,12 +233,12 @@ export default function Questions() {
       )}
       {editCat && (
         <Popup
-          closePopup={setEditCat}
+          closePopup={() => setEditCat(false)}
           contents={
             <EditCategories
+              sections={sections}
               categories={categories}
               setCategories={setCategories}
-              versionCheck={versionCheck}
               questions={questions}
               setQuestions={setQuestions}
               user={user}
@@ -319,18 +251,14 @@ export default function Questions() {
 }
 
 export function EditCategories({
+  sections,
   categories,
   setCategories,
-  versionCheck,
-  questions,
   setQuestions,
   user
 }) {
-  let [sections, setSections] = useState([]);
   let [currentS, setCurrentS] = useState(-1);
   let [currentC, setCurrentC] = useState(-1);
-  let [cats, setCats] = useState(categories);
-  let [qs, setQs] = useState(questions);
   let [addState, setAddState] = useState(0);
   let [addCat, setAddCat] = useState("");
   let [addCatNum, setAddCatNum] = useState("");
@@ -345,209 +273,32 @@ export function EditCategories({
   let [newCatCheck, setNewCatCheck] = useState(false);
   let [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    let section = [];
-    cats.forEach(c => {
-      if (
-        !section.includes(c.substring(0, c.indexOf("-"))) &&
-        c !== "no category"
-      )
-        section.push(c.substring(0, c.indexOf("-")));
+  async function addC(newCategory) {
+    await category.add(newCategory).then(newCategories => {
+      if (newCategories.error !== undefined)
+        setErrorMessage(newCategories.error);
+      setCategories(newCategories.c);
     });
-    setSections(section.sort());
-  }, [cats]);
-
-  async function addC(category) {
-    newData = { q: "", c: "" };
-    await versionCheck();
-    if (newData.c === "" || (newData.c !== "" && !newData.c.includes(category)))
-      await db
-        .collection("fields")
-        .doc("category")
-        .update({
-          categories: firebase.firestore.FieldValue.arrayUnion(category)
-        });
-    await db
-      .collection("version")
-      .doc("versionCheck")
-      .update({
-        questions: firebase.firestore.FieldValue.increment(1),
-        categories: firebase.firestore.FieldValue.increment(1)
-      });
-    localStorage.setItem(
-      "category-version",
-      parseInt(localStorage.getItem("category-version"), 10) + 1
-    );
-    let tempC = [];
-    if (newData.c === "") {
-      tempC = [...cats, category].sort();
-    } else {
-      tempC = [...newData.c, category].sort();
-    }
-    setCategories(tempC);
-    setCats(tempC);
-    localStorage.setItem("categories", JSON.stringify(tempC));
-  }
-  async function editC(category, oCat) {
-    newData = { q: "", c: "" };
-    await versionCheck();
-    console.log(1);
-    console.log(newData);
-    if (newData.c === "" || (newData.c !== "" && newData.c.includes(oCat))) {
-      console.log(2);
-      let tempQ = [];
-      let updateQ = [];
-      if (newData.q === "") {
-        tempQ = [...qs];
-      } else {
-        tempQ = [...newData.q.q];
-      }
-      tempQ = tempQ.map(q => {
-        if (q.category === oCat) {
-          updateQ.push({ ...q, category: category });
-          return { ...q, category: category };
-        } else {
-          return { ...q };
-        }
-      });
-      let tempC = [];
-      if (newData.c === "") {
-        tempC = [...cats];
-      } else {
-        tempC = [...newData.c];
-      }
-      tempC = tempC.map(c => {
-        if (c === oCat) return category;
-        else return c;
-      });
-      await db
-        .collection("fields")
-        .doc("category")
-        .set({ categories: tempC });
-      let batch = db.batch();
-      updateQ.forEach(q => {
-        batch.update(db.collection("questions").doc(q.name), q);
-      });
-      batch.commit();
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({
-          questions: firebase.firestore.FieldValue.increment(1),
-          categories: firebase.firestore.FieldValue.increment(1)
-        });
-      setQs(tempQ);
-      setQuestions(tempQ);
-      setCats(tempC);
-      setCategories(tempC);
-      localStorage.setItem("all-questions", JSON.stringify(tempQ));
-      localStorage.setItem("categories", JSON.stringify(tempC));
-      localStorage.setItem(
-        "category-version",
-        parseInt(localStorage.getItem("category-version"), 10) + 1
-      );
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-    } else {
-      setCats(newData.c);
-      setCategories(newData.c);
-      localStorage.setItem("categories", JSON.stringify(newData.c));
-      if (newData.q !== "") {
-        setQs(newData.q.q);
-        setQuestions(newData.q.q);
-        localStorage.setItem("all-questions", JSON.stringify(newData.q.q));
-      }
-      setCurrentC(-1);
-      setErrorMessage(
-        "Error: The category you are trying to edit no longer exists or was changed to something else."
-      );
-    }
   }
 
-  async function deleteC(category, newCat) {
-    newData = { q: "", c: "" };
-    await versionCheck();
-    if (newData.c === "" || (newData.c !== "" && newData.c.includes(category))) {
-      await db
-        .collection("fields")
-        .doc("category")
-        .update({
-          categories: firebase.firestore.FieldValue.arrayRemove(category)
-        });
-      let tempC = [];
-      if (newData.c !== "") {
-        tempC = [...newData.c];
-      } else {
-        tempC = [...cats];
-      }
-      tempC = tempC.filter(c => c !== category);
-      if (!tempC.includes(newCat)) {
-        await db
-          .collection("fields")
-          .doc("category")
-          .update({
-            categories: firebase.firestore.FieldValue.arrayUnion(newCat)
-          });
-        tempC = [...tempC, newCat];
-      }
-      let tempQ = [];
-      let updatedQ = [];
-      if (newData.q.q !== "") {
-        tempQ = [...newData.q.q];
-      } else {
-        tempQ = [...qs];
-      }
-      tempQ = tempQ.map(q => {
-        if (q.category === category) {
-          updatedQ.push({ ...q, category: newCat });
-          return { ...q, category: newCat };
-        } else {
-          return { ...q };
-        }
-      });
-      let batch = db.batch();
-      updatedQ.forEach(q => {
-        batch.update(db.collection("questions").doc(q.name), q);
-      });
-      batch.commit();
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({
-          questions: firebase.firestore.FieldValue.increment(1),
-          categories: firebase.firestore.FieldValue.increment(1)
-        });
-      setQs(tempQ);
-      setQuestions(tempQ);
-      setCats(tempC);
-      setCategories(tempC);
-      localStorage.setItem("all-questions", JSON.stringify(tempQ));
-      localStorage.setItem("categories", JSON.stringify(tempC));
-      localStorage.setItem(
-        "category-version",
-        parseInt(localStorage.getItem("category-version"), 10) + 1
-      );
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-    } else {
-      setCats(newData.c);
-      setCategories(newData.c);
-      localStorage.setItem("categories", JSON.stringify(newData.c));
-      if (newData.q.q !== "") {
-        setQs(newData.q.q);
-        setQuestions(newData.q.q);
-        localStorage.setItem("all-questions", JSON.stringify(newData.q.q));
-      }
-      setCurrentC(-1);
-      setErrorMessage(
-        "Error: The category you are trying to delete no longer exists or was changed to something else."
-      );
-    }
+  async function editC(newCategory, original) {
+    await category.edit(newCategory, original).then(newCategories => {
+      if (newCategories.error !== undefined)
+        setErrorMessage(newCategories.error);
+      setCategories(newCategories.c);
+      setQuestions(newCategories.q);
+    })
   }
+
+  async function deleteC(original, newCategory) {
+    await category.delete(original, newCategory).then(newCategories => {
+      if (newCategories.error !== undefined)
+        setErrorMessage(newCategories.error);
+      setCategories(newCategories.c);
+      setQuestions(newCategories.q);
+    })
+  }
+
   return (
     <div className="center c-editor">
       <div className={"center c-title bg-1-" + user.theme}>
@@ -587,7 +338,7 @@ export function EditCategories({
         <div className={"c-actions bg-2-" + user.theme}>
           <div className={"center action-add bg-1-" + user.theme}>
             <p className={"center c-subtitle"}>Add Category</p>
-            {cats.includes(addCat + "-" + addCatNum) && (
+            {categories.includes(addCat + "-" + addCatNum) && (
               <p>Category Already Exists!</p>
             )}
             {addState === 1 && <p>Invalid Category</p>}
@@ -631,7 +382,7 @@ export function EditCategories({
                 className={"btn-small bg-3-" + user.theme}
                 onClick={() => {
                   if (
-                    !cats.includes(addCat + "-" + addCatNum) &&
+                    !categories.includes(addCat + "-" + addCatNum) &&
                     addCat.length !== 0 &&
                     addCatNum.length !== 0
                   ) {
@@ -649,7 +400,7 @@ export function EditCategories({
           </div>
           {currentC !== -1 && (
             <div className={"center action-edit bg-1-" + user.theme}>
-              <p className="c-subtitle">Edit {cats[currentC]}</p>
+              <p className="c-subtitle">Edit {categories[currentC]}</p>
               {editState === -1 &&
                 (editCat.length === 0 || editCatNum.length === 0) && (
                   <p>Invalid Category</p>
@@ -662,7 +413,7 @@ export function EditCategories({
               )}
               {editState === 1 && (
                 <p>
-                  Editing {cats[currentC]} to {editCat + "-" + editCatNum}
+                  Editing {categories[currentC]} to {editCat + "-" + editCatNum}
                 </p>
               )}
               <div style={{ display: "flex", flexDirection: "row" }}>
@@ -710,7 +461,7 @@ export function EditCategories({
                     } else {
                       editC(
                         (editCat + "-" + editCatNum).toLocaleLowerCase(),
-                        cats[currentC]
+                        categories[currentC]
                       );
                       setEditState(0);
                       setEditCat("");
@@ -731,7 +482,7 @@ export function EditCategories({
               style={{ display: "flex", flexDirection: "column" }}
               className={"center action-delete bg-1-" + user.theme}
             >
-              <p className="c-subtitle">Delete {cats[currentC]}</p>
+              <p className="c-subtitle">Delete {categories[currentC]}</p>
               <div>
                 {deleteState === 0 && (
                   <button className={"btn-small bg-3-" + user.theme} onClick={() => setDeleteState(1)}>delete</button>
@@ -758,12 +509,12 @@ export function EditCategories({
                       className="center"
                     >
                       <p>Select an existing category</p>
-                      {newC !== -1 && <p>Selected: {cats[newC]}</p>}
+                      {newC !== -1 && <p>Selected: {categories[newC]}</p>}
                       <button
                         className={"btn-small bg-3-" + user.theme}
                         onClick={() => {
                           setDeleteState(3);
-                          setNewCat(cats[newC]);
+                          setNewCat(categories[newC]);
                           setNewC(-1);
                         }}
                       >
@@ -786,7 +537,7 @@ export function EditCategories({
                           {newNumber.length > 0 ? newNumber : "_____"}
                         </p>
                       )}
-                      {cats.includes(newName + "-" + newNumber) && (
+                      {categories.includes(newName + "-" + newNumber) && (
                         <p>Category Exists! Please select instead</p>
                       )}
                       <div style={{ display: "flex", flexDirection: "row" }}>
@@ -831,7 +582,7 @@ export function EditCategories({
                             if (
                               newName.length > 0 &&
                               newNumber.length > 0 &&
-                              !cats.includes(newName + " " + newNumber)
+                              !categories.includes(newName + " " + newNumber)
                             ) {
                               setDeleteState(3);
                               setNewCat(newName + "-" + newNumber);
@@ -855,7 +606,7 @@ export function EditCategories({
                     className="center"
                   >
                     <p>
-                      Deleting {cats[currentC]} and assigning questions to{" "}
+                      Deleting {categories[currentC]} and assigning questions to{" "}
                       {newCat}
                     </p>
                     <div>
@@ -863,7 +614,7 @@ export function EditCategories({
                         className={"btn-small bg-3-" + user.theme}
                         onClick={() => {
                           setDeleteState(0);
-                          deleteC(cats[currentC], newCat);
+                          deleteC(categories[currentC], newCat);
                           setNewCat("no category");
                           setCurrentC(-1);
                         }}
