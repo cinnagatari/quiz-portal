@@ -25,7 +25,7 @@ export default function QuestionSets() {
   let [currentSet, setCurrentSet] = useState("");
   let [currentQ, setCurrentQ] = useState(-1);
   let [currentQuestion, setCurrentQuestion] = useState("");
-  let [adding, setAdding] = useState(true);
+  let [adding, setAdding] = useState(false);
   let [editing, setEditing] = useState(false);
   let [loading, setLoading] = useState(true);
   let user = useContext(UserContext);
@@ -205,7 +205,7 @@ export default function QuestionSets() {
                     icon={
                       ICONS[
                         LANGUAGES.indexOf(
-                          language !== "none" ? language : "java"
+                          language !== "none" ? language : currentQuestion.languages[0]
                         )
                       ]
                     }
@@ -368,7 +368,7 @@ function EditSets({ questions, sets, setSets, mode, categories }) {
                 className="icon"
                 icon={
                   ICONS[
-                    LANGUAGES.indexOf(language !== "none" ? language : "java")
+                    LANGUAGES.indexOf(language !== "none" ? language : currentQuestion.languages[0])
                   ]
                 }
               />
