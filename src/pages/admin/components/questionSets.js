@@ -62,7 +62,7 @@ export default function QuestionSets() {
 
   return (
     <div className="set-editor">
-      <div>
+      <div className="filter-container">
         {!loading && (
           <Filter
             newFilter={setFilter}
@@ -128,7 +128,11 @@ export default function QuestionSets() {
                     margin: "5px"
                   }}
                   className="icon"
-                  icon={ICONS[LANGUAGES.indexOf("java")]}
+                  icon={
+                    ICONS[
+                      LANGUAGES.indexOf(language !== "none" ? language : "java")
+                    ]
+                  }
                 />
                 <p className="preview-id">{currentQ.name}</p>
               </div>

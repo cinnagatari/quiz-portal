@@ -18,6 +18,7 @@ export default function Filter({
   let [categories, setCategories] = useState([]);
   let [selected, setSelected] = useState([]);
   let [filter, setFilter] = useState([]);
+  let [showFilter, setShowFilter] = useState(false);
   let [language, setLanguage] = useState("none");
   let [type, setType] = useState("none");
   let [lowerDiff, setLowerDiff] = useState(1);
@@ -62,179 +63,188 @@ export default function Filter({
   return (
     <div className={"filter bg-1-" + user.theme}>
       <div style={{ display: "flex", justifyContent: "flex-start" }}>
-        <p className={"f-title"}>Filter</p>
+        <button
+          onClick={() => setShowFilter(!showFilter)}
+          className={"btn-medium btn-" + user.theme}
+        >
+          {!showFilter ? "Open Filter" : "Close Filter"}
+        </button>
       </div>
-      <div className={"f-top-row + bg-2-" + user.theme}>
-        <div className={"center f-subsection + bg-1-" + user.theme}>
-          <p className={"f-subtitle"}>Languages</p>
-          <div>
-            {LANGUAGES.map(l => (
+      {showFilter && (
+        <div>
+          <div className={"f-top-row + bg-2-" + user.theme}>
+            <div className={"center f-subsection + bg-1-" + user.theme}>
+              <p className={"f-subtitle"}>Languages</p>
+              <div>
+                {LANGUAGES.map(l => (
+                  <button
+                    key={l}
+                    className={
+                      "btn-small btn-" +
+                      user.theme +
+                      (l === language ? " btn-selected-2-" + user.theme : "")
+                    }
+                    onClick={() => setLanguage(l)}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={"center f-subsection bg-1-" + user.theme}>
+              <p className={"f-subtitle"}>Type</p>
+              <div>
+                <button
+                  key={"mc"}
+                  className={
+                    "btn-small btn-" +
+                    user.theme +
+                    (type === "mc" ? " btn-selected-2-" + user.theme : "")
+                  }
+                  onClick={() => {
+                    setType(type !== "mc" ? "mc" : "none");
+                  }}
+                >
+                  {"Multiple Choice"}
+                </button>
+                <button
+                  key={"sa"}
+                  className={
+                    "btn-small btn-" +
+                    user.theme +
+                    (type === "sa" ? " btn-selected-2-" + user.theme : "")
+                  }
+                  onClick={() => {
+                    setType(type !== "sa" ? "sa" : "none");
+                  }}
+                >
+                  {"Free Response"}
+                </button>
+              </div>
+            </div>
+            <div className={"center f-subsection bg-1-" + user.theme}>
+              <p className={"f-subtitle"}>Difficulty Range</p>
+              <div>
+                <select
+                  className={"sel-2"}
+                  key={"lower"}
+                  value={lowerDiff}
+                  onChange={ev => {
+                    setLowerDiff(parseInt(ev.target.value), 10);
+                    newLowerDiff(parseInt(ev.target.value), 10);
+                  }}
+                >
+                  {DIFFICULTY.map(d => (
+                    <option key={"l" + d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className={"sel-2"}
+                  key={"upper"}
+                  value={upperDiff}
+                  onChange={ev => {
+                    setUpperDiff(parseInt(ev.target.value), 10);
+                    newUpperDiff(parseInt(ev.target.value), 10);
+                  }}
+                >
+                  {new Array(DIFFICULTY.length + 1 - lowerDiff)
+                    .fill(0)
+                    .map((d, i) => lowerDiff + i)
+                    .map((d, i) => (
+                      <option key={"l" + d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className={"f-sections"}>
+            <div>
+              <p className="f-title">Sections</p>
+            </div>
+            {sections.map((s, i) => (
               <button
-                key={l}
+                key={s + i}
                 className={
                   "btn-small btn-" +
                   user.theme +
-                  (l === language ? " btn-selected-2-" + user.theme : "")
+                  (currentS === i ? " btn-selected-2-" + user.theme : "")
                 }
-                onClick={() => setLanguage(l)}
+                onClick={() => setCurrentS(i)}
               >
-                {l}
+                {s}
               </button>
             ))}
           </div>
-        </div>
-        <div className={"center f-subsection bg-1-" + user.theme}>
-          <p className={"f-subtitle"}>Type</p>
-          <div>
-            <button
-              key={"mc"}
-              className={
-                "btn-small btn-" +
-                user.theme +
-                (type === "mc" ? " btn-selected-2-" + user.theme : "")
+          <div className={"f-categories bg-2-" + user.theme}>
+            <p className="f-title">Categories</p>
+            {categories.map(c => {
+              if (sections[currentS] === c.substring(0, c.indexOf("-"))) {
+                return (
+                  <button
+                    key={c + "f"}
+                    className={
+                      "btn-small btn-" +
+                      user.theme +
+                      (filter.includes(c) ? " btn-selected-" + user.theme : "")
+                    }
+                    onClick={() => {
+                      updateFilter(c);
+                      setSelected(
+                        selected.includes(c)
+                          ? selected.filter(s => s !== c)
+                          : [...selected, c]
+                      );
+                    }}
+                  >
+                    {c}
+                  </button>
+                );
               }
-              onClick={() => {
-                setType(type !== "mc" ? "mc" : "none");
-              }}
-            >
-              {"Multiple Choice"}
-            </button>
-            <button
-              key={"sa"}
-              className={
-                "btn-small btn-" +
-                user.theme +
-                (type === "sa" ? " btn-selected-2-" + user.theme : "")
-              }
-              onClick={() => {
-                setType(type !== "sa" ? "sa" : "none");
-              }}
-            >
-              {"Free Response"}
-            </button>
+            })}
           </div>
-        </div>
-        <div className={"center f-subsection bg-1-" + user.theme}>
-          <p className={"f-subtitle"}>Difficulty Range</p>
-          <div>
-            <select
-              className={"sel-2"}
-              key={"lower"}
-              value={lowerDiff}
-              onChange={ev => {
-                setLowerDiff(parseInt(ev.target.value), 10);
-                newLowerDiff(parseInt(ev.target.value), 10);
-              }}
-            >
-              {DIFFICULTY.map(d => (
-                <option key={"l" + d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-            <select
-              className={"sel-2"}
-              key={"upper"}
-              value={upperDiff}
-              onChange={ev => {
-                setUpperDiff(parseInt(ev.target.value), 10);
-                newUpperDiff(parseInt(ev.target.value), 10);
-              }}
-            >
-              {new Array(DIFFICULTY.length + 1 - lowerDiff)
-                .fill(0)
-                .map((d, i) => lowerDiff + i)
-                .map((d, i) => (
-                  <option key={"l" + d} value={d}>
-                    {d}
-                  </option>
-                ))}
-            </select>
-          </div>
-        </div>
-      </div>
-      <div className={"f-sections"}>
-        <div>
-          <p className="f-title">Sections</p>
-        </div>
-        {sections.map((s, i) => (
-          <button
-            key={s + i}
-            className={
-              "btn-small btn-" +
-              user.theme +
-              (currentS === i ? " btn-selected-2-" + user.theme : "")
-            }
-            onClick={() => setCurrentS(i)}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
-      <div className={"f-categories bg-2-" + user.theme}>
-        <p className="f-title">Categories</p>
-        {categories.map(c => {
-          if (sections[currentS] === c.substring(0, c.indexOf("-"))) {
-            return (
+          <div className="f-categories">
+            <p className="f-title">Selected Categories</p>
+            {selected.map(c => (
               <button
-                key={c + "f"}
-                className={
-                  "btn-small btn-" +
-                  user.theme +
-                  (filter.includes(c) ? " btn-selected-" + user.theme : "")
-                }
+                key={c + "s"}
+                className={"btn-small btn-" + user.theme}
                 onClick={() => {
                   updateFilter(c);
-                  setSelected(
-                    selected.includes(c)
-                      ? selected.filter(s => s !== c)
-                      : [...selected, c]
-                  );
+                  setSelected(selected.filter(s => s !== c));
                 }}
               >
                 {c}
               </button>
-            );
-          }
-        })}
-      </div>
-      <div className="f-categories">
-        <p className="f-title">Selected Categories</p>
-        {selected.map(c => (
-          <button
-            key={c + "s"}
-            className={"btn-small btn-" + user.theme}
-            onClick={() => {
-              updateFilter(c);
-              setSelected(selected.filter(s => s !== c));
-            }}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-      <div style={{ display: "flex", justifyContent: "flex-start" }}>
-        <button
-          className={"btn-small btn-" + user.theme}
-          onClick={() => {
-            newFilter(filter);
-            newType(type);
-            newLanguage(language);
-          }}
-        >
-          Apply filter
-        </button>
-        <button
-          className={"btn-small btn-" + user.theme}
-          onClick={() => {
-            setFilter([]);
-            setSelected([]);
-            setType("none");
-          }}
-        >
-          Reset filter
-        </button>
-      </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+            <button
+              className={"btn-small btn-" + user.theme}
+              onClick={() => {
+                newFilter(filter);
+                newType(type);
+                newLanguage(language);
+              }}
+            >
+              Apply filter
+            </button>
+            <button
+              className={"btn-small btn-" + user.theme}
+              onClick={() => {
+                setFilter([]);
+                setSelected([]);
+                setType("none");
+              }}
+            >
+              Reset filter
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

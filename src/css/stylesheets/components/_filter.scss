@@ -4,7 +4,6 @@
   padding: 5px;
   border-radius: 10px;
   margin: 5px;
-
   .f-title {
     border-radius: 10px;
     padding: 5px;
@@ -14,6 +13,7 @@
     margin-top: 5px;
     border-radius: 10px;
     padding: 5px;
+    margin-left: 5px;
     display: flex;
     flex-direction: row;
     .f-subsection {
@@ -39,6 +39,7 @@
     padding: 5px;
     display: flex;
     flex-direction: row;
+    margin-left: 5px;
     .f-title {
       border-radius: 10px;
       padding: 5px;
@@ -47,6 +48,7 @@
   }
   .f-categories {
     margin-top: 5px;
+    margin-left: 5px;
     border-radius: 10px;
     padding: 5px;
     display: flex;
