@@ -287,6 +287,12 @@ function EditSets({ questions, sets, setSets, mode, categories }) {
     );
   }
 
+  async function addSet(set) {
+    let versionState = {};
+    await version.check().then(v => versionState = v);
+    
+  }
+
   return (
     <div className="center s-editor">
       <div className={"s-title bg-1-" + user.theme}>{mode} Set</div>

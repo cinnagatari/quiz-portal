@@ -349,15 +349,18 @@ const question = {
         "questions",
         JSON.stringify([...questions, newQuestion])
       );
-      localStorage.setItem("categories", JSON.stringify(categories));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
       return {
         q: [...questions, newQuestion],
         n: [...names, newQuestion.name],
         c: categories
       };
     } else {
-      localStorage.setItem("questions", JSON.stringify(questions));
-      localStorage.setItem("categories", JSON.stringify(categories));
+      if (versionState.q === "load")
+        localStorage.setItem("questions", JSON.stringify(questions));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
       return {
         q: questions,
         n: [...names, newQuestion.name],
@@ -414,11 +417,14 @@ const question = {
         .doc(newQuestion.name)
         .set(newQuestion);
       localStorage.setItem("questions", JSON.stringify(questions));
-      localStorage.setItem("categories", JSON.stringify(categories));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
       return { q: questions, n: questions.map(q => q.name), c: categories };
     } else {
-      localStorage.setItem("questions", JSON.stringify(questions));
-      localStorage.setItem("categories", JSON.stringify(categories));
+      if (versionState.q === "load")
+        localStorage.setItem("questions", JSON.stringify(questions));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
       return {
         q: questions,
         n: questions.map(q => q.name),
@@ -465,11 +471,14 @@ const question = {
         .doc(original.name)
         .delete();
       localStorage.setItem("questions", JSON.stringify(questions));
-      localStorage.setItem("categories", JSON.stringify(categories));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
       return { q: questions, n: names, c: categories };
     } else {
-      localStorage.setItem("questions", JSON.stringify(questions));
-      localStorage.setItem("categories", JSON.stringify(categories));
+      if (versionState.q === "load")
+        localStorage.setItem("questions", JSON.stringify(questions));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
       return {
         q: questions,
         n: names,
@@ -481,10 +490,75 @@ const question = {
 };
 
 const sets = {
-  filter: function filterQ() {
-    let filtered = [];
-
-    return [];
+  add: async function addSet(newSet) {
+    let versionState = {};
+    await version.check().then(v => (versionState = v));
+    let categories = [];
+    if (
+      versionState.c === "load" ||
+      JSON.parse(localStorage.getItem("categories")) === null
+    ) {
+      await loadDB.categories().then(v => (categories = v));
+    } else {
+      categories = JSON.parse(localStorage.getItem("categories"));
+    }
+    let questions = [];
+    if (
+      versionState.q === "load" ||
+      JSON.parse(localStorage.getItem("questions")) === null
+    ) {
+      await loadDB.questions().then(v => (questions = v));
+    } else {
+      questions = JSON.parse(localStorage.getItem("questions"));
+    }
+    let sets = [];
+    if (
+      versionState.s === "load" ||
+      JSON.parse(localStorage.getItem("sets")) === null
+    ) {
+      await loadDB.sets().then(v => (sets = v));
+    } else {
+      sets = JSON.parse(localStorage.getItem("sets"));
+    }
+    let flag = false;
+    let names = questions.map(q => q.name);
+    newSet.questions.forEach(q => {
+      if (names.includes(q)) flag = true;
+    });
+    if (!sets.map(s => s.name).includes(newSet.name) || !flag) {
+      sets = [...sets, newSet];
+      await db
+        .collection("sets")
+        .doc(newSet.name)
+        .set(newSet);
+      await db
+        .collection("version")
+        .doc("versionCheck")
+        .update({ sets: firebase.firestore.FieldValue.increment(1) });
+      localStorage.setItem(
+        "set-version",
+        parseInt(localStorage.getItem("set-version"), 10) + 1
+      );
+      if (versionState.q === "load")
+        localStorage.setItem("questions", JSON.stringify(questions));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
+      localStorage.setItem("sets", sets);
+      return { q: questions, n: names, c: categories };
+    } else {
+      if (versionState.q === "load")
+        localStorage.setItem("questions", JSON.stringify(questions));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
+      localStorage.setItem("sets", sets);
+      return {
+        q: questions,
+        n: names,
+        c: categories,
+        error:
+          "Error: The set you are trying to add has already been added or one of the questions may no longer exist."
+      };
+    }
   }
 };
 

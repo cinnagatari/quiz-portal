@@ -131,7 +131,8 @@ export default function Filter({
                   value={lowerDiff}
                   onChange={ev => {
                     setLowerDiff(parseInt(ev.target.value), 10);
-                    newLowerDiff(parseInt(ev.target.value), 10);
+                    if (upperDiff < ev.target.value)
+                      setUpperDiff(ev.target.value);
                   }}
                 >
                   {DIFFICULTY.map(d => (
@@ -145,18 +146,16 @@ export default function Filter({
                   key={"upper"}
                   value={upperDiff}
                   onChange={ev => {
-                    setUpperDiff(parseInt(ev.target.value), 10);
-                    newUpperDiff(parseInt(ev.target.value), 10);
+                    setUpperDiff(parseInt(ev.target.value, 10));
+                    if (ev.target.value < lowerDiff)
+                      setLowerDiff(ev.target.value);
                   }}
                 >
-                  {new Array(DIFFICULTY.length + 1 - lowerDiff)
-                    .fill(0)
-                    .map((d, i) => lowerDiff + i)
-                    .map((d, i) => (
-                      <option key={"l" + d} value={d}>
-                        {d}
-                      </option>
-                    ))}
+                  {DIFFICULTY.map(d => (
+                    <option key={"" + d} value={d}>
+                      {d}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -228,6 +227,8 @@ export default function Filter({
                 newFilter(filter);
                 newType(type);
                 newLanguage(language);
+                newUpperDiff(upperDiff);
+                newLowerDiff(lowerDiff);
               }}
             >
               Apply filter
@@ -238,6 +239,8 @@ export default function Filter({
                 setFilter([]);
                 setSelected([]);
                 setType("none");
+                setUpperDiff(1);
+                setLowerDiff(10);
               }}
             >
               Reset filter
