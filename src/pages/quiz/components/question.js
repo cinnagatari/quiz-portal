@@ -45,7 +45,7 @@ export default function Question({
             value={answer}
             mode={language}
             theme="github"
-            fontSize="18px"
+            fontSize="14px"
             showPrintMargin={false}
             style={{ maxHeight: "330px", width: "80%", borderRadius: '10px' }}
             editorProps={{
@@ -65,7 +65,7 @@ export default function Question({
                   value={a}
                   mode={language}
                   theme="github"
-                  fontSize="18px"
+                  fontSize="14px"
                   showPrintMargin={false}
                   style={{
                     minHeight: "50px",

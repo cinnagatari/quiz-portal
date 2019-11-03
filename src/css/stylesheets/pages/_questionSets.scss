@@ -6,25 +6,42 @@
     display: flex;
     align-items: flex-start;
   }
+  .set-container {
+    display: flex;
+    flex-direction: row;
+    margin: 5px;
+    border-radius: 10px;
+    .s-title {
+      padding: 5px;
+      margin: 5px;
+      border-radius: 10px;
+      font-size: $text-base-size * 2;
+    }
+
+  }
   .question-preview {
     border-radius: 10px;
     padding: 5px;
     margin: 5px;
     display: flex;
-    flex-direction: column;
-    width: 50vw;
-    justify-content: flex-start;
+    flex-direction: row;
+    width: 60vw;
     .p-container {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       border-radius: 10px;
       margin: 5px;
       padding: 5px;
-      .preview-title {
-        font-size: $text-base-size * 2.5;
-      }
-      .preview-id {
-        font-size: $text-base-size * 2.5;
+      width: 95%;
+      .t-container {
+        display: flex;
+        flex-direction: row;
+        .preview-title {
+          font-size: $text-base-size * 2.5;
+        }
+        .preview-id {
+          font-size: $text-base-size * 2.5;
+        }
       }
     }
   }

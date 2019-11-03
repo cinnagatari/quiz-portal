@@ -1,9 +1,9 @@
 .filter {
   display: flex;
   flex-direction: column;
-  padding: 5px;
   border-radius: 10px;
   margin: 5px;
+  padding: 5px;
   .f-title {
     border-radius: 10px;
     padding: 5px;
@@ -14,6 +14,7 @@
     border-radius: 10px;
     padding: 5px;
     margin-left: 5px;
+    margin-right: 5px;
     display: flex;
     flex-direction: row;
     .f-subsection {
@@ -35,11 +36,12 @@
   }
   .f-sections {
     margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
     border-radius: 10px;
     padding: 5px;
     display: flex;
     flex-direction: row;
-    margin-left: 5px;
     .f-title {
       border-radius: 10px;
       padding: 5px;
@@ -49,6 +51,7 @@
   .f-categories {
     margin-top: 5px;
     margin-left: 5px;
+    margin-right: 5px;
     border-radius: 10px;
     padding: 5px;
     display: flex;
