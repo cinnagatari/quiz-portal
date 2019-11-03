@@ -5,7 +5,6 @@ import Popup from "../../../main/components/popup";
 import UserContext from "../../../utils/userContext";
 import { loadDB, version, category, question } from "../../../libraries/loadDB";
 
-
 const DEFAULT = [
   {
     question: { java: "a", python: "b", javascript: "c" },
@@ -51,7 +50,7 @@ export default function Questions() {
 
   useEffect(() => {
     setNames(questions.map(q => q.name));
-  }, [])
+  }, []);
 
   useEffect(() => {
     let section = [];
@@ -76,33 +75,30 @@ export default function Questions() {
       }
       setQuestions(newQuestions.q);
       setCategories(newQuestions.c);
-    })
+    });
   }
 
   async function editQ(newQuestion, original) {
     await question.edit(newQuestion, original).then(newQuestions => {
       console.log(newQuestions);
-      if (newQuestions.error !== undefined)
-        setErrorMessage(newQuestions.error);
+      if (newQuestions.error !== undefined) setErrorMessage(newQuestions.error);
       setQuestions(newQuestions.q);
       setCategories(newQuestions.c);
-    })
+    });
   }
-
 
   async function deleteQ(original) {
     await question.delete(original).then(newQuestions => {
-      if (newQuestions.error !== undefined)
-        setErrorMessage(newQuestions.error);
+      if (newQuestions.error !== undefined) setErrorMessage(newQuestions.error);
       setQuestions(newQuestions.q);
       setCategories(newQuestions.c);
       setCurrentQ(-1);
-    })
+    });
   }
 
   async function versionCheck() {
     let versionState = "";
-    await version.check().then(v => versionState = v);
+    await version.check().then(v => (versionState = v));
     if (versionState.q === "load") loadQuestions();
     else localQuestions();
     if (versionState.c === "load") loadCategories();
@@ -110,7 +106,9 @@ export default function Questions() {
   }
 
   async function loadQuestions() {
-    await loadDB.questions().then(questions => { setQuestions(questions) });
+    await loadDB.questions().then(questions => {
+      setQuestions(questions);
+    });
   }
 
   async function loadCategories() {
@@ -137,17 +135,26 @@ export default function Questions() {
       setQuestions(questions);
     }
   }
-  
+
   return (
     <div className="questions">
       <div className={"q-sections bg-2-" + user.theme}>
-        <div style={{ display: 'flex', flexDirection: "column" }} className="center">
-          <p className={"center q-section-title bg-1-" + user.theme}>Sections</p>
+        <div
+          style={{ display: "flex", flexDirection: "column" }}
+          className="center"
+        >
+          <p className={"center q-section-title bg-1-" + user.theme}>
+            Sections
+          </p>
         </div>
         <div className="section-btns">
           {sections.map((s, i) => (
             <button
-              className={"btn-medium btn-" + user.theme + (i === currentS ? " btn-selected-" + user.theme : "")}
+              className={
+                "btn-medium btn-" +
+                user.theme +
+                (i === currentS ? " btn-selected-" + user.theme : "")
+              }
               key={s + i}
               onClick={() => {
                 setCurrentS(currentS !== i ? i : -1);
@@ -161,16 +168,30 @@ export default function Questions() {
         </div>
       </div>
       <div className={"q-categories bg-2-" + user.theme}>
-        <div style={{ display: 'flex', flexDirection: "column" }} className="center">
-          <p className={"center q-category-title bg-1-" + user.theme}>Categories</p>
-          <button className={"edit-category btn-" + user.theme} onClick={() => setEditCat(true)}>Edit Categories</button>
+        <div
+          style={{ display: "flex", flexDirection: "column" }}
+          className="center"
+        >
+          <p className={"center q-category-title bg-1-" + user.theme}>
+            Categories
+          </p>
+          <button
+            className={"edit-category btn-" + user.theme}
+            onClick={() => setEditCat(true)}
+          >
+            Edit Categories
+          </button>
         </div>
         <div className={"category-btns"}>
           {categories.map(
             (c, i) =>
               c.substring(0, c.indexOf("-")) === sections[currentS] && (
                 <button
-                  className={"btn-small btn-" + user.theme + (i === currentC ? " btn-selected-" + user.theme : "")}
+                  className={
+                    "btn-small btn-" +
+                    user.theme +
+                    (i === currentC ? " btn-selected-" + user.theme : "")
+                  }
                   onClick={() => {
                     setCurrentC(currentC === i ? -1 : i);
                     setCurrentQ(-1);
@@ -184,19 +205,40 @@ export default function Questions() {
         </div>
       </div>
       <div className={"q-questions bg-2-" + user.theme}>
-        <div className="center" style={{ display: 'flex', flexDirection: "column" }}>
-          <p className={"center q-question-title bg-1-" + user.theme}>Questions</p>
-          <button className={"center add-question btn-" + user.theme} onClick={() => {
-            setAdding(true);
-            setCurrentQ(-1);
-          }}>Add Question</button>
-          {currentQ !== -1 && <button className={"center delete-question btn-" + user.theme} onClick={() => deleteQ(questions[currentQ])}>Delete Question</button>}
+        <div
+          className="center"
+          style={{ display: "flex", flexDirection: "column" }}
+        >
+          <p className={"center q-question-title bg-1-" + user.theme}>
+            Questions
+          </p>
+          <button
+            className={"center add-question btn-" + user.theme}
+            onClick={() => {
+              setAdding(true);
+              setCurrentQ(-1);
+            }}
+          >
+            Add Question
+          </button>
+          {currentQ !== -1 && (
+            <button
+              className={"center delete-question btn-" + user.theme}
+              onClick={() => deleteQ(questions[currentQ])}
+            >
+              Delete Question
+            </button>
+          )}
         </div>
         <div>
           {questions.map((q, i) => {
             return q.category === categories[currentC] ? (
               <button
-                className={"btn-small btn-" + user.theme + (i === currentQ ? " btn-selected-" + user.theme : "")}
+                className={
+                  "btn-small btn-" +
+                  user.theme +
+                  (i === currentQ ? " btn-selected-" + user.theme : "")
+                }
                 key={q.name + i}
                 onClick={() => {
                   setCurrentQ(currentQ !== i ? i : -1);
@@ -206,8 +248,8 @@ export default function Questions() {
                 {q.name}
               </button>
             ) : (
-                undefined
-              );
+              undefined
+            );
           })}
         </div>
       </div>
@@ -287,7 +329,7 @@ export function EditCategories({
         setErrorMessage(newCategories.error);
       setCategories(newCategories.c);
       setQuestions(newCategories.q);
-    })
+    });
   }
 
   async function deleteC(original, newCategory) {
@@ -296,7 +338,7 @@ export function EditCategories({
         setErrorMessage(newCategories.error);
       setCategories(newCategories.c);
       setQuestions(newCategories.q);
-    })
+    });
   }
 
   return (
@@ -306,33 +348,45 @@ export function EditCategories({
       </div>
       <div className="c-container">
         <div className={"c-list-sections bg-2-" + user.theme}>
-          <p style={{ alignSelf: 'center' }}>Section</p>
+          <p style={{ alignSelf: "center" }}>Section</p>
           {sections.map((s, i) => (
-            <button key={"section:" + s} className={"btn-xsmall bg-3-" + user.theme + (i === currentS ? " btn-selected-" + user.theme : "")} onClick={() => setCurrentS(i)}>
+            <button
+              key={"section:" + s}
+              className={
+                "btn-xsmall bg-3-" +
+                user.theme +
+                (i === currentS ? " btn-selected-" + user.theme : "")
+              }
+              onClick={() => setCurrentS(i)}
+            >
               {s}
             </button>
           ))}
         </div>
         <div className={"c-list-categories bg-2-" + user.theme}>
-          <p style={{ alignSelf: 'center' }}>Category</p>
+          <p style={{ alignSelf: "center" }}>Category</p>
           {categories.map((c, i) => {
             return sections[currentS] === c.substring(0, c.indexOf("-")) ? (
               <button
-                className={"btn-xsmall bg-3-" + user.theme + (i === currentC ? " btn-selected-" + user.theme : "")}
+                className={
+                  "btn-xsmall bg-3-" +
+                  user.theme +
+                  (i === currentC ? " btn-selected-" + user.theme : "")
+                }
                 key={c + i}
                 onClick={() => {
                   deleteState === 0
                     ? setCurrentC(i)
                     : deleteState === 2
-                      ? setNewC(i === currentC ? newC : i)
-                      : setNewC(newC);
+                    ? setNewC(i === currentC ? newC : i)
+                    : setNewC(newC);
                 }}
               >
                 {c}
               </button>
             ) : (
-                undefined
-              );
+              undefined
+            );
           })}
         </div>
         <div className={"c-actions bg-2-" + user.theme}>
@@ -472,7 +526,12 @@ export function EditCategories({
                   {editState === 1 ? "confirm" : "edit"}
                 </button>
                 {editState === 1 && (
-                  <button className={"btn-small bg-3-" + user.theme} onClick={() => setEditState(0)}>cancel</button>
+                  <button
+                    className={"btn-small bg-3-" + user.theme}
+                    onClick={() => setEditState(0)}
+                  >
+                    cancel
+                  </button>
                 )}
               </div>
             </div>
@@ -485,7 +544,12 @@ export function EditCategories({
               <p className="c-subtitle">Delete {categories[currentC]}</p>
               <div>
                 {deleteState === 0 && (
-                  <button className={"btn-small bg-3-" + user.theme} onClick={() => setDeleteState(1)}>delete</button>
+                  <button
+                    className={"btn-small bg-3-" + user.theme}
+                    onClick={() => setDeleteState(1)}
+                  >
+                    delete
+                  </button>
                 )}
                 {deleteState === 1 && (
                   <div
@@ -494,8 +558,18 @@ export function EditCategories({
                   >
                     <p>Assign to another category for affected questions?</p>
                     <div className="center">
-                      <button className={"btn-small bg-3-" + user.theme} onClick={() => setDeleteState(2)}>yes</button>
-                      <button className={"btn-small bg-3-" + user.theme} onClick={() => setDeleteState(3)}>no</button>
+                      <button
+                        className={"btn-small bg-3-" + user.theme}
+                        onClick={() => setDeleteState(2)}
+                      >
+                        yes
+                      </button>
+                      <button
+                        className={"btn-small bg-3-" + user.theme}
+                        onClick={() => setDeleteState(3)}
+                      >
+                        no
+                      </button>
                     </div>
                   </div>
                 )}
@@ -644,7 +718,12 @@ export function EditCategories({
               style={{ display: "flex", flexDirection: "column" }}
             >
               <p>{errorMessage}</p>
-              <button className={"btn-small bg-3-" + user.theme} onClick={() => setErrorMessage("")}>ok</button>
+              <button
+                className={"btn-small bg-3-" + user.theme}
+                onClick={() => setErrorMessage("")}
+              >
+                ok
+              </button>
             </div>
           )}
         </div>

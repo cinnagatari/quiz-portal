@@ -35,7 +35,7 @@ export default function Main() {
         setTheme
       }}
     >
-      <div className="app">
+      <div className={"app bg-1-" + theme}>
         <div className={"center header bg-1-" + theme}>
           <Link to="/">
             <img
