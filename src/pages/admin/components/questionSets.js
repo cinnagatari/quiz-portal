@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { version, loadDB, sets, question } from "../../../libraries/loadDB";
+import { version, loadDB, set, question } from "../../../libraries/loadDB";
 import Popup from "../../../main/components/popup";
 import Question from "../../quiz/components/question";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,6 +28,7 @@ export default function QuestionSets() {
   let [adding, setAdding] = useState(false);
   let [editing, setEditing] = useState(false);
   let [loading, setLoading] = useState(true);
+  let [errorMessage, setErrorMessage] = useState("");
   let user = useContext(UserContext);
 
   useEffect(() => {
@@ -47,6 +48,14 @@ export default function QuestionSets() {
         ]
       );
   }, [currentQ]);
+
+  async function deleteSet(original) {
+    await set.delete(original).then(newValues => {
+      if (newValues.error !== "") setErrorMessage(newValues.error);
+      setSets(newValues.s);
+    });
+  }
+
   async function versionCheck() {
     let versionState = {};
     await version.check().then(version => (versionState = version));
@@ -66,8 +75,6 @@ export default function QuestionSets() {
     });
     return cnt === filter.length;
   }
-
-  console.log(currentQuestion);
 
   return (
     <div className="set-editor">
@@ -99,8 +106,21 @@ export default function QuestionSets() {
           </button>
           {currentSet !== "" && (
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <button className={"btn-small btn-" + user.theme}>Edit</button>
-              <button className={"btn-small btn-" + user.theme}>Delete</button>
+              <button
+                onClick={() => setEditing(true)}
+                className={"btn-small btn-" + user.theme}
+              >
+                Edit
+              </button>
+              <button
+                className={"btn-small btn-" + user.theme}
+                onClick={() => {
+                  deleteSet(currentSet.name);
+                  setCurrentSet("");
+                }}
+              >
+                Delete
+              </button>
             </div>
           )}
         </div>
@@ -160,14 +180,32 @@ export default function QuestionSets() {
           contents={
             <EditSets
               questions={questions}
+              setQuestions={setQuestions}
               sets={sets}
               setSets={setSets}
               mode={"Add"}
+              close={() => setAdding(false)}
             />
           }
         />
       )}
-      {editing && <EditSets />}
+      {editing && (
+        <Popup
+          close={() => setEditing(false)}
+          contents={
+            <EditSets
+              questions={questions}
+              setQuestions={setQuestions}
+              sets={sets}
+              setSets={setSets}
+              setCurrentSet={setCurrentSet}
+              setEdit={currentSet}
+              mode={"Edit"}
+              close={() => setEditing(false)}
+            />
+          }
+        />
+      )}
 
       {currentQuestion !== "" && (
         <Popup
@@ -205,7 +243,9 @@ export default function QuestionSets() {
                     icon={
                       ICONS[
                         LANGUAGES.indexOf(
-                          language !== "none" ? language : currentQuestion.languages[0]
+                          language !== "none"
+                            ? language
+                            : currentQuestion.languages[0]
                         )
                       ]
                     }
@@ -266,7 +306,16 @@ export default function QuestionSets() {
   );
 }
 
-function EditSets({ questions, sets, setSets, mode, categories }) {
+function EditSets({
+  questions,
+  setQuestions,
+  sets,
+  setSets,
+  setCurrentSet,
+  setEdit,
+  mode,
+  close
+}) {
   let [filter, setFilter] = useState([]);
   let [language, setLanguage] = useState("none");
   let [type, setType] = useState("none");
@@ -274,7 +323,14 @@ function EditSets({ questions, sets, setSets, mode, categories }) {
   let [upperDiff, setUpperDiff] = useState(10);
   let [currentQuestion, setCurrentQuestion] = useState("");
   let [name, setName] = useState("");
+  let names = questions.map(q => q.name);
+  let [length, setLength] = useState("");
   let [addedQuestions, setAddedQuestions] = useState([]);
+  let [addedCategories, setAddedCategories] = useState([]);
+  let [currentC, setCurrentC] = useState("");
+  let [averageDiff, setAverageDiff] = useState("");
+  let [valid, setValid] = useState(true);
+  let [errorMessage, setErrorMessage] = useState("");
   let user = useContext(UserContext);
 
   function checkFilter(q) {
@@ -287,35 +343,162 @@ function EditSets({ questions, sets, setSets, mode, categories }) {
     );
   }
 
-  async function addSet(set) {
-    let versionState = {};
-    await version.check().then(v => versionState = v);
-    
+  useEffect(() => {
+    if (mode === "Edit") {
+      setName(setEdit.name);
+      setAddedQuestions(
+        setEdit.questions.map(q => questions[names.indexOf(q)])
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    let categories = [];
+    let difficulty = 0;
+    addedQuestions.forEach(q => {
+      if (!categories.includes(q.category)) categories.push(q.category);
+      difficulty += parseInt(q.difficulty, 10);
+    });
+    setCurrentC(categories.includes(currentC) ? currentC : "");
+    setAddedCategories(categories.sort());
+    setAverageDiff(Math.floor(difficulty / addedQuestions.length));
+  }, [addedQuestions]);
+
+  async function addSet(newSet) {
+    await set.add(newSet).then(newValues => {
+      if (newValues.error !== undefined) setErrorMessage(newValues.error);
+      setQuestions(newValues.q);
+      setSets(newValues.s);
+    });
+  }
+
+  async function editSet(newSet) {
+    await set.edit(newSet, setEdit.name).then(newValues => {
+      if (newValues.error !== undefined) setErrorMessage(newValues.error);
+      else setCurrentSet(newSet);
+      setQuestions(newValues.q);
+      setSets(newValues.s);
+    });
+  }
+
+  function randomize() {
+    let filtered = [...questions];
+    filtered = filtered.filter(q => checkFilter(q));
+    let visited = new Array(filtered.length).fill(false);
+    let random = [];
+    while (random.length < Math.min(filtered.length, length)) {
+      let rand = Math.floor(Math.random() * filtered.length);
+      if (!visited[rand]) {
+        random.push(filtered[rand]);
+        visited[rand] = true;
+      }
+    }
+    setAddedQuestions(random);
   }
 
   return (
     <div className="center s-editor">
-      <div className={"s-title bg-1-" + user.theme}>{mode} Set</div>
-      <div>
-        <input
-          className="inp-1"
-          value={name}
-          onChange={ev => setName(ev.target.value)}
-          placeholder="enter name"
-        />
-      </div>
-      <div>
-        {addedQuestions.map(q => (
+      <div className={"s-title bg-1-" + user.theme}>Set Editor</div>
+      <div className={"s-fields"}>
+        <div className={"fields-inputs"}>
+          {!valid && names.includes(name) && <p>Name is in use</p>}
+          <input
+            className="inp-1"
+            value={name}
+            onChange={ev => setName(ev.target.value)}
+            placeholder="enter name"
+          />
+          {errorMessage !== "" && <p>{errorMessage}</p>}
           <button
-            key={q.name + "-selected"}
-            onClick={() =>
-              setAddedQuestions(addedQuestions.filter(v => v.name !== q.name))
-            }
             className={"btn-small btn-" + user.theme}
+            onClick={() => {
+              if (
+                addedQuestions.length !== 0 &&
+                (!sets.map(s => s.name).includes(name) || name === setEdit.name)
+              ) {
+                if (mode === "add")
+                  addSet({
+                    name: name,
+                    questions: addedQuestions.map(q => q.name)
+                  });
+                else
+                  editSet({
+                    name: name,
+                    questions: addedQuestions.map(q => q.name)
+                  });
+                setValid(true);
+                close();
+              } else {
+                setValid(false);
+              }
+            }}
           >
-            {q.name}
+            {mode}
           </button>
-        ))}
+          <input
+            placeholder="# of questions"
+            type="number"
+            className="inp-2"
+            value={length}
+            onChange={ev => setLength(ev.target.value)}
+          />
+          <button
+            className={"btn-small btn-" + user.theme}
+            onClick={() => randomize()}
+          >
+            randomize
+          </button>
+          {addedQuestions.length !== 0 && (
+            <div className={"center stats-difficulty"}>
+              <p className={"stats-title bg-1-" + user.theme}>Difficulty</p>
+              <p className={"stats-number"}>{averageDiff}</p>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className={"fields-questions"}>
+        {addedQuestions.length !== 0 && (
+          <div className={"f-stats"}>
+            <div className={"stats-categories"}>
+              <p className={"stats-title bg-1-" + user.theme}>Categories</p>
+
+              {addedCategories.map(c => (
+                <button
+                  key={"sel-" + c}
+                  className={
+                    "btn-small btn-" +
+                    user.theme +
+                    (c === currentC ? " btn-selected-" + user.theme : "")
+                  }
+                  onClick={() => setCurrentC(c !== currentC ? c : "")}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className={"f-questions"}>
+          {addedQuestions.map(q => (
+            <button
+              key={q.name + "-selected"}
+              onClick={() => {
+                if (currentQuestion.name === q.name)
+                  setAddedQuestions(
+                    addedQuestions.filter(v => v.name !== q.name)
+                  );
+                else setCurrentQuestion(q);
+              }}
+              className={
+                "btn-small btn-" +
+                user.theme +
+                (q.category === currentC ? " btn-selected-" + user.theme : "")
+              }
+            >
+              {q.name + (currentQuestion.name === q.name ? "(X)" : "")}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="s-container">
         <div className={"left-container bg-1-" + user.theme}>
@@ -374,7 +557,11 @@ function EditSets({ questions, sets, setSets, mode, categories }) {
                 className="icon"
                 icon={
                   ICONS[
-                    LANGUAGES.indexOf(language !== "none" ? language : currentQuestion.languages[0])
+                    LANGUAGES.indexOf(
+                      language !== "none"
+                        ? language
+                        : currentQuestion.languages[0]
+                    )
                   ]
                 }
               />

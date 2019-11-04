@@ -489,7 +489,7 @@ const question = {
   }
 };
 
-const sets = {
+const set = {
   add: async function addSet(newSet) {
     let versionState = {};
     await version.check().then(v => (versionState = v));
@@ -526,7 +526,26 @@ const sets = {
       if (names.includes(q)) flag = true;
     });
     if (!sets.map(s => s.name).includes(newSet.name) || !flag) {
-      sets = [...sets, newSet];
+      let filter = [];
+      let languages = [];
+      let difficulty = 0;
+      newSet.questions.forEach(q => {
+        if (!filter.includes(questions[names.indexOf(q)].category))
+          filter.push(questions[names.indexOf(q)].category);
+        if (!filter.includes(questions[names.indexOf(q)].type))
+          filter.push(questions[names.indexOf(q)].type);
+        questions[names.indexOf(q)].languages.forEach(l => {
+          if (!languages.includes(l)) languages.push(l);
+        });
+        difficulty += questions[names.indexOf(q)].difficulty;
+      });
+      sets.push({
+        name: newSet.name,
+        questions: newSet.questions,
+        filter: filter,
+        languages: languages,
+        difficulty: difficulty / newSet.questions.length
+      });
       await db
         .collection("sets")
         .doc(newSet.name)
@@ -539,27 +558,168 @@ const sets = {
         "set-version",
         parseInt(localStorage.getItem("set-version"), 10) + 1
       );
+      sets = sets.sort((a, b) =>
+        a.name < b.name ? -1 : a.name > b.name ? 1 : 0
+      );
       if (versionState.q === "load")
         localStorage.setItem("questions", JSON.stringify(questions));
       if (versionState.c === "load")
         localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("sets", sets);
-      return { q: questions, n: names, c: categories };
+      localStorage.setItem("sets", JSON.stringify(sets));
+      return { q: questions, s: sets };
     } else {
       if (versionState.q === "load")
         localStorage.setItem("questions", JSON.stringify(questions));
       if (versionState.c === "load")
         localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("sets", sets);
+      localStorage.setItem("sets", JSON.stringify(sets));
       return {
         q: questions,
-        n: names,
-        c: categories,
+        s: sets,
         error:
           "Error: The set you are trying to add has already been added or one of the questions may no longer exist."
       };
     }
+  },
+
+  edit: async function editSet(newSet, original) {
+    let versionState = {};
+    await version.check().then(v => (versionState = v));
+    let categories = [];
+    if (
+      versionState.c === "load" ||
+      JSON.parse(localStorage.getItem("categories")) === null
+    ) {
+      await loadDB.categories().then(v => (categories = v));
+    } else {
+      categories = JSON.parse(localStorage.getItem("categories"));
+    }
+    let questions = [];
+    if (
+      versionState.q === "load" ||
+      JSON.parse(localStorage.getItem("questions")) === null
+    ) {
+      await loadDB.questions().then(v => (questions = v));
+    } else {
+      questions = JSON.parse(localStorage.getItem("questions"));
+    }
+    let sets = [];
+    if (
+      versionState.s === "load" ||
+      JSON.parse(localStorage.getItem("sets")) === null
+    ) {
+      await loadDB.sets().then(v => (sets = v));
+    } else {
+      sets = JSON.parse(localStorage.getItem("sets"));
+    }
+    let flag = false;
+    let names = questions.map(q => q.name);
+    newSet.questions.forEach(q => {
+      if (names.includes(q)) flag = true;
+    });
+    if (
+      !sets.map(s => s.name).includes(newSet.name) ||
+      newSet.name === original ||
+      !flag
+    ) {
+      let filter = [];
+      let languages = [];
+      let difficulty = 0;
+      newSet.questions.forEach(q => {
+        if (!filter.includes(questions[names.indexOf(q)].category))
+          filter.push(questions[names.indexOf(q)].category);
+        if (!filter.includes(questions[names.indexOf(q)].type))
+          filter.push(questions[names.indexOf(q)].type);
+        questions[names.indexOf(q)].languages.forEach(l => {
+          if (!languages.includes(l)) languages.push(l);
+        });
+        difficulty += questions[names.indexOf(q)].difficulty;
+      });
+      sets = sets.filter(set => set.name !== original);
+      sets.push({
+        name: newSet.name,
+        questions: newSet.questions,
+        filter: filter,
+        languages: languages,
+        difficulty: difficulty / newSet.questions.length
+      });
+      if (original !== newSet.name)
+        await db
+          .collection("sets")
+          .doc(original)
+          .delete();
+      await db
+        .collection("sets")
+        .doc(newSet.name)
+        .set(newSet);
+      await db
+        .collection("version")
+        .doc("versionCheck")
+        .update({ sets: firebase.firestore.FieldValue.increment(1) });
+      localStorage.setItem(
+        "set-version",
+        parseInt(localStorage.getItem("set-version"), 10) + 1
+      );
+      sets = sets.sort((a, b) =>
+        a.name < b.name ? -1 : a.name > b.name ? 1 : 0
+      );
+      if (versionState.q === "load")
+        localStorage.setItem("questions", JSON.stringify(questions));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
+      localStorage.setItem("sets", JSON.stringify(sets));
+      return { q: questions, s: sets };
+    } else {
+      if (versionState.q === "load")
+        localStorage.setItem("questions", JSON.stringify(questions));
+      if (versionState.c === "load")
+        localStorage.setItem("categories", JSON.stringify(categories));
+      localStorage.setItem("sets", JSON.stringify(sets));
+      return {
+        q: questions,
+        s: sets,
+        error:
+          "Error: The name is already in use or a question no longer exists."
+      };
+    }
+  },
+
+  delete: async function deleteSet(original) {
+    let versionState = {};
+    await version.check().then(v => (versionState = v));
+    let sets = [];
+    if (
+      versionState.s === "load" ||
+      JSON.parse(localStorage.getItem("sets")) === null
+    ) {
+      await loadDB.sets().then(v => (sets = v));
+    } else {
+      sets = JSON.parse(localStorage.getItem("sets"));
+    }
+    if (sets.map(s => s.name).includes(original)) {
+      sets = sets.filter(set => set.name !== original);
+      await db
+        .collection("sets")
+        .doc(original)
+        .delete();
+      await db
+        .collection("version")
+        .doc("versionCheck")
+        .update({ sets: firebase.firestore.FieldValue.increment(1) });
+      localStorage.setItem(
+        "set-version",
+        parseInt(localStorage.getItem("set-version"), 10) + 1
+      );
+      sets = sets.sort((a, b) =>
+        a.name < b.name ? -1 : a.name > b.name ? 1 : 0
+      );
+      localStorage.setItem("sets", JSON.stringify(sets));
+      return { s: sets };
+    } else {
+      localStorage.setItem("sets", JSON.stringify(sets));
+      return { s: sets };
+    }
   }
 };
 
-export { loadDB, version, category, question, sets };
+export { loadDB, version, category, question, set };

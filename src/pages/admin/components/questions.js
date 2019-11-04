@@ -27,8 +27,6 @@ const DEFAULT = [
   }
 ];
 
-let newData = { q: "", c: "" };
-
 export default function Questions() {
   let user = useContext(UserContext);
   let [sections, setSections] = useState([]);
