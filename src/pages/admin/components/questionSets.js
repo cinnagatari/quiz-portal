@@ -97,8 +97,6 @@ export default function QuestionSets() {
         return cnt === filter.length;
     }
 
-    console.log(sets);
-
     return (
         <div className="set-editor">
             <div className="filter-container">

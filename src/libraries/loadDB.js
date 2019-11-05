@@ -37,8 +37,6 @@ const version = {
         }
         if (versions.includes("s")) {
             let sV = await idb.versions.get("sets").then(s => s);
-            console.log(2);
-            console.log(sV);
             if (sV === undefined || vSS.data().sets !== sV.version) {
                 console.log(1);
                 idb.versions.put({ type: "sets", version: vSS.data().sets });
