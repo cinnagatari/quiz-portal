@@ -9,6 +9,8 @@ import UserContext from "../utils/userContext";
 import Home from "./components/home";
 import QuestionSets from "../pages/admin/components/questionSets";
 import Questions from "../pages/admin/components/questions";
+import Test from "../pages/test";
+import Courses from "../pages/admin/components/courses";
 
 export default function Main() {
   let [user, setUser] = useState("");
@@ -51,10 +53,12 @@ export default function Main() {
           {loggedIn && (
             <Switch>
               <Route path="/admin/questions" component={Questions} />
+              <Route path="/admin/courses" component={Courses} />
               <Route path="/admin/sets" component={QuestionSets} />
               <Route path="/admin" component={Admin} />
               <Route path={`/quiz/:set`} component={Quiz} />
               <Route path={"/quiz"} component={QuizHome} />
+              <Route path={"/test"} component={Test} />
               <Route path={"/"} component={Home} />
             </Switch>
           )}

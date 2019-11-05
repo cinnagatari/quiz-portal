@@ -1,0 +1,44 @@
+.courses-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  .courses {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 5px;
+    .c-title {
+      border-radius: 10px;
+      padding: 5px;
+      margin: 5px;
+      font-size: $text-base-size * 2;
+    }
+    .course {
+      display: flex;
+      flex-direction: row;
+      padding: 5px;
+    }
+  }
+  .classes {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 5px;
+    .c-title {
+      border-radius: 10px;
+      padding: 5px;
+      margin: 5px;
+      font-size: $text-base-size * 2;
+    }
+    .class {
+      display: flex;
+      flex-direction: row;
+      padding: 5px;
+    }
+  }
+  .class {
+      
+  }
+}

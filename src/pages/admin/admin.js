@@ -26,9 +26,9 @@ export default function Admin() {
           </Link>
           <Link
             className={"center option option-" + user.theme}
-            to="/admin/classes"
+            to="/admin/courses"
           >
-            Edit Classes
+            Edit Courses
           </Link>
           <Link
             className={"center option option-" + user.theme}

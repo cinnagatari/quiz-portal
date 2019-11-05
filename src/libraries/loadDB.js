@@ -1,725 +1,190 @@
-import { db, firebase } from "../utils/firebase";
+import { db } from "../utils/firebase";
+import idb from "../utils/indexedDB";
 
 const version = {
-  check: async function versionCheck() {
-    let versionState = { q: "local", c: "local", s: "local" };
-    let vSS = await db
-      .collection("version")
-      .doc("versionCheck")
-      .get();
-    if (
-      vSS.data().questions !==
-      parseInt(localStorage.getItem("question-version"), 10)
-    ) {
-      localStorage.setItem(
-        "question-version",
-        JSON.stringify(vSS.data().questions)
-      );
-      versionState.q = "load";
+    check: async function versionCheck(versions) {
+        let versionState = {
+            q: "local",
+            c: "local",
+            s: "local",
+            co: "local",
+            u: "local"
+        };
+
+        let vSS = await db
+            .collection("version")
+            .doc("versionCheck")
+            .get();
+        if (versions.includes("q")) {
+            let qV = await idb.versions.get("questions").then(q => q);
+            if (qV === undefined || vSS.data().questions !== qV.version) {
+                idb.versions.put({
+                    type: "questions",
+                    version: vSS.data().questions
+                });
+                versionState.q = "load";
+            }
+        }
+        if (versions.includes("c")) {
+            let cV = await idb.versions.get("categories").then(c => c);
+            if (cV === undefined || vSS.data().categories !== cV.version) {
+                idb.versions.put({
+                    type: "categories",
+                    version: vSS.data().categories
+                });
+                versionState.c = "load";
+            }
+        }
+        if (versions.includes("s")) {
+            let sV = await idb.versions.get("sets").then(s => s);
+            console.log(2);
+            console.log(sV);
+            if (sV === undefined || vSS.data().sets !== sV.version) {
+                console.log(1);
+                idb.versions.put({ type: "sets", version: vSS.data().sets });
+                versionState.s = "load";
+            }
+        }
+        if (versions.includes("co")) {
+            let cV = await idb.versions.get("courses").then(c => c);
+            if (cV === undefined || vSS.data().courses !== cV.version) {
+                idb.versions.put({
+                    type: "courses",
+                    version: vSS.data().courses
+                });
+                versionState.co = "load";
+            }
+        }
+        if (versions.includes("u")) {
+            let uV = await idb.versions.get("users").then(u => u);
+
+            if (uV === undefined || vSS.data().users !== uV.version) {
+                idb.versions.put({ type: "users", version: vSS.data().users });
+                versionState.co = "load";
+            }
+        }
+        return versionState;
     }
-    if (
-      vSS.data().categories !==
-      parseInt(localStorage.getItem("category-version"), 10)
-    ) {
-      localStorage.setItem(
-        "category-version",
-        JSON.stringify(vSS.data().categories)
-      );
-      versionState.c = "load";
-    }
-    if (vSS.data().sets !== parseInt(localStorage.getItem("set-version"), 10)) {
-      localStorage.setItem("set-version", JSON.stringify(vSS.data().sets));
-      versionState.s = "load";
-    }
-    return versionState;
-  }
 };
 
 const loadDB = {
-  questions: async function loadQuestions() {
-    let questions = [];
-    let qSS = await db.collection("questions").get();
-    qSS.docs.forEach(q => {
-      questions.push({
-        question: q.data().question,
-        answers: q.data().answers,
-        category: q.data().category,
-        difficulty: q.data().difficulty,
-        name: q.data().name,
-        languages: q.data().languages,
-        type: q.data().type,
-        solution: q.data().solution,
-        placeholder: q.data().placeholder
-      });
-    });
-    localStorage.setItem("questions", JSON.stringify(questions));
-    return questions;
-  },
-
-  categories: async function loadCategories() {
-    let cSS = await db
-      .collection("fields")
-      .doc("category")
-      .get();
-    localStorage.setItem(
-      "categories",
-      JSON.stringify(cSS.data().categories.sort())
-    );
-    return cSS.data().categories.sort();
-  },
-
-  sets: async function loadSets() {
-    let sets = [];
-    let questions = [];
-    if (localStorage.getItem("questions") !== null) {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    } else {
-      await loadDB.questions().then(newQuestions => (questions = newQuestions));
-    }
-    let names = questions.map(q => q.name);
-    let sSS = await db.collection("sets").get();
-    sSS.forEach(s => {
-      let filter = [];
-      let languages = [];
-      let difficulty = 0;
-      s.data().questions.forEach(q => {
-        if (!filter.includes(questions[names.indexOf(q)].category))
-          filter.push(questions[names.indexOf(q)].category);
-        if (!filter.includes(questions[names.indexOf(q)].type))
-          filter.push(questions[names.indexOf(q)].type);
-        questions[names.indexOf(q)].languages.forEach(l => {
-          if (!languages.includes(l)) languages.push(l);
+    questions: async function loadQuestions() {
+        let questions = [];
+        let qSS = await db.collection("questions").get();
+        qSS.docs.forEach(q => {
+            questions.push({
+                question: q.data().question,
+                answers: q.data().answers,
+                category: q.data().category,
+                difficulty: q.data().difficulty,
+                name: q.data().name,
+                languages: q.data().languages,
+                type: q.data().type,
+                solution: q.data().solution,
+                placeholder: q.data().placeholder
+            });
         });
-        difficulty += questions[names.indexOf(q)].difficulty;
-      });
-      sets.push({
-        name: s.data().name,
-        questions: s.data().questions,
-        filter: filter,
-        languages: languages,
-        difficulty: difficulty
-      });
-    });
+        idb.questions.put({ all: "questions", questions: questions });
+        return questions;
+    },
 
-    localStorage.setItem("sets", JSON.stringify(sets));
-    return sets;
-  }
-};
-
-const category = {
-  add: async function addC(category) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    if (!categories.includes(category)) {
-      await db
-        .collection("fields")
-        .doc("category")
-        .update({
-          categories: firebase.firestore.FieldValue.arrayUnion(category)
+    categories: async function loadCategories() {
+        let cSS = await db
+            .collection("fields")
+            .doc("category")
+            .get();
+        idb.categories.put({
+            all: "categories",
+            categories: cSS.data().categories.sort()
         });
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({
-          categories: firebase.firestore.FieldValue.increment(1)
-        });
-      localStorage.setItem(
-        "category-version",
-        parseInt(localStorage.getItem("category-version"), 10) + 1
-      );
-      localStorage.setItem(
-        "categories",
-        JSON.stringify([...categories, category].sort())
-      );
-      return { c: [...categories, category].sort() };
-    } else {
-      return {
-        c: categories,
-        error:
-          "Error: The category you are trying to add has already been added."
-      };
-    }
-  },
+        return cSS.data().categories.sort();
+    },
 
-  edit: async function editC(newCategory, original) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    let questions = [];
-    if (
-      versionState.q === "load" ||
-      JSON.parse(localStorage.getItem("questions")) === null
-    ) {
-      await loadDB.questions().then(v => (questions = v));
-    } else {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    }
-    if (!categories.includes(newCategory)) {
-      let updatedQuestions = [];
-      questions = questions.map(q => {
-        if (q.category === original) {
-          updatedQuestions.push({ ...q, category: newCategory });
-          return { ...q, category: newCategory };
+    sets: async function loadSets() {
+        let sets = [];
+        let questions = [];
+        let qs = await idb.questions.get("questions").then(q => q);
+        if (qs !== undefined) {
+            questions = qs.questions;
         } else {
-          return { ...q };
+            await loadDB
+                .questions()
+                .then(newQuestions => (questions = newQuestions));
         }
-      });
-      let batch = db.batch();
-      updatedQuestions.forEach(q => {
-        batch.update(db.collection("questions").doc(q.name), q);
-      });
-      batch.commit();
-      categories = categories.map(c => {
-        if (c === original) return newCategory;
-        else return c;
-      });
-      await db
-        .collection("fields")
-        .doc("category")
-        .set({ categories: categories });
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({
-          questions: firebase.firestore.FieldValue.increment(1),
-          categories: firebase.firestore.FieldValue.increment(1)
+        let names = questions.map(q => q.name);
+        let sSS = await db.collection("sets").get();
+        sSS.forEach(s => {
+            let filter = [];
+            let setQuestions = s
+                .data()
+                .questions.filter(q => names.includes(q));
+            let languages = [];
+            let difficulty = 0;
+            setQuestions.forEach(q => {
+                if (!filter.includes(questions[names.indexOf(q)].category))
+                    filter.push(questions[names.indexOf(q)].category);
+                if (!filter.includes(questions[names.indexOf(q)].type))
+                    filter.push(questions[names.indexOf(q)].type);
+                questions[names.indexOf(q)].languages.forEach(l => {
+                    if (!languages.includes(l)) languages.push(l);
+                });
+                difficulty += questions[names.indexOf(q)].difficulty;
+            });
+            sets.push({
+                name: s.data().name,
+                questions: setQuestions,
+                filter: filter,
+                languages: languages,
+                difficulty: Math.floor(difficulty / setQuestions.length)
+            });
         });
-      localStorage.setItem("all-questions", JSON.stringify(questions));
-      localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem(
-        "category-version",
-        parseInt(localStorage.getItem("category-version"), 10) + 1
-      );
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-      return { q: questions, c: categories };
-    } else {
-      localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("questions", JSON.stringify(questions));
-      return {
-        q: questions,
-        c: categories,
-        error:
-          "Error: The category you are trying to edit no longer exists or was changed to something else."
-      };
-    }
-  },
+        idb.sets.put({ all: "sets", sets });
+        return sets;
+    },
 
-  delete: async function deleteC(original, newCategory) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    let questions = [];
-    if (
-      versionState.q === "load" ||
-      JSON.parse(localStorage.getItem("questions")) === null
-    ) {
-      await loadDB.questions().then(v => (questions = v));
-    } else {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    }
-    if (categories.includes(original)) {
-      await db
-        .collection("fields")
-        .doc("category")
-        .update({
-          categories: firebase.firestore.FieldValue.arrayRemove(original)
+    courses: async function loadCourses() {
+        let courses = [];
+        let cSS = await db.collection("courses").get();
+        cSS.forEach(c => {
+            courses.push({
+                name: c.data().name,
+                classes: c.data().classes
+            });
         });
-      categories = categories.filter(c => c !== original);
-      if (!categories.includes(newCategory)) {
-        await db
-          .collection("fields")
-          .doc("category")
-          .update({
-            categories: firebase.firestore.FieldValue.arrayUnion(newCategory)
-          });
-        categories = [...categories, newCategory];
-      }
-      let updatedQuestions = [];
-      questions = questions.map(q => {
-        if (q.category === category) {
-          updatedQuestions.push({ ...q, category: newCategory });
-          return { ...q, category: newCategory };
-        } else {
-          return { ...q };
-        }
-      });
-      let batch = db.batch();
-      updatedQuestions.forEach(q => {
-        batch.update(db.collection("questions").doc(q.name), q);
-      });
-      batch.commit();
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({
-          questions: firebase.firestore.FieldValue.increment(1),
-          categories: firebase.firestore.FieldValue.increment(1)
+        courses = courses.sort((a, b) => a.data().name < b.data().name);
+        idb.courses.put({ all: "courses", courses });
+        return courses;
+    },
+
+    classes: async function loadClasses() {
+        let classes = [];
+        let cSS = await db.collection("classes").get();
+        cSS.forEach(c => {
+            classes.push({
+                course: c.data().course,
+                students: c.data().students,
+                time: c.data().time
+            });
         });
-      localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("questions", JSON.stringify(questions));
-      localStorage.setItem(
-        "category-version",
-        parseInt(localStorage.getItem("category-version"), 10) + 1
-      );
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-      return { q: questions, c: categories };
-    } else {
-      localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("questions", JSON.stringify(questions));
-      return {
-        q: questions,
-        c: categories,
-        error:
-          "Error: The category you are trying to delete no longer exists or was changed to something else."
-      };
+        idb.classes.put({ all: "classes", classes });
+        return classes;
+    },
+
+    users: async function loadUsers() {
+        let users = [];
+        let uSS = await db.collection("users").get();
+        uSS.forEach(u => {
+            users.push({
+                admin: u.data().admin,
+                name: u.data().name,
+                username: u.data().username,
+                courses: u.data().courses
+            });
+        });
+
+        idb.users.put({ all: "users", users });
+        return users;
     }
-  }
 };
 
-const question = {
-  add: async function add(newQuestion) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    let questions = [];
-    if (
-      versionState.q === "load" ||
-      JSON.parse(localStorage.getItem("questions")) === null
-    ) {
-      await loadDB.questions().then(v => (questions = v));
-    } else {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    }
-    let names = questions.map(q => q.name);
-    if (
-      !names.includes(newQuestion.name) &&
-      categories.includes(newQuestion.category)
-    ) {
-      db.collection("questions")
-        .doc(newQuestion.name)
-        .set(newQuestion);
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({ questions: firebase.firestore.FieldValue.increment(1) });
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-      localStorage.setItem(
-        "questions",
-        JSON.stringify([...questions, newQuestion])
-      );
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      return {
-        q: [...questions, newQuestion],
-        n: [...names, newQuestion.name],
-        c: categories
-      };
-    } else {
-      if (versionState.q === "load")
-        localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      return {
-        q: questions,
-        n: [...names, newQuestion.name],
-        c: categories,
-        error:
-          "Error: The question name is already being used or the category no longer exists."
-      };
-    }
-  },
-
-  edit: async function editQ(newQuestion, original) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    let questions = [];
-    if (
-      versionState.q === "load" ||
-      JSON.parse(localStorage.getItem("questions")) === null
-    ) {
-      await loadDB.questions().then(v => (questions = v));
-    } else {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    }
-    let names = questions.map(q => q.name);
-    if (
-      names.includes(original.name) &&
-      categories.includes(newQuestion.category)
-    ) {
-      questions = questions.map(q => {
-        if (q.name === original.name) return newQuestion;
-        else return q;
-      });
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({ questions: firebase.firestore.FieldValue.increment(1) });
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-      if (newQuestion.name !== original.name)
-        db.collection("questions")
-          .doc(original.name)
-          .delete();
-      db.collection("questions")
-        .doc(newQuestion.name)
-        .set(newQuestion);
-      localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      return { q: questions, n: questions.map(q => q.name), c: categories };
-    } else {
-      if (versionState.q === "load")
-        localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      return {
-        q: questions,
-        n: questions.map(q => q.name),
-        c: categories,
-        error:
-          "Error: The new question name already exists or the new category no longer exists."
-      };
-    }
-  },
-
-  delete: async function deleteQ(original) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    let questions = [];
-    if (
-      versionState.q === "load" ||
-      JSON.parse(localStorage.getItem("questions")) === null
-    ) {
-      await loadDB.questions().then(v => (questions = v));
-    } else {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    }
-    let names = questions.map(q => q.name);
-    if (names.includes(original.name)) {
-      questions = questions.filter(q => original.name !== q.name);
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({ questions: firebase.firestore.FieldValue.increment(1) });
-      localStorage.setItem(
-        "question-version",
-        parseInt(localStorage.getItem("question-version"), 10) + 1
-      );
-      db.collection("questions")
-        .doc(original.name)
-        .delete();
-      localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      return { q: questions, n: names, c: categories };
-    } else {
-      if (versionState.q === "load")
-        localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      return {
-        q: questions,
-        n: names,
-        c: categories,
-        error: "Error: The question you are trying to delete no longer exists."
-      };
-    }
-  }
-};
-
-const set = {
-  add: async function addSet(newSet) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    let questions = [];
-    if (
-      versionState.q === "load" ||
-      JSON.parse(localStorage.getItem("questions")) === null
-    ) {
-      await loadDB.questions().then(v => (questions = v));
-    } else {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    }
-    let sets = [];
-    if (
-      versionState.s === "load" ||
-      JSON.parse(localStorage.getItem("sets")) === null
-    ) {
-      await loadDB.sets().then(v => (sets = v));
-    } else {
-      sets = JSON.parse(localStorage.getItem("sets"));
-    }
-    let flag = false;
-    let names = questions.map(q => q.name);
-    newSet.questions.forEach(q => {
-      if (names.includes(q)) flag = true;
-    });
-    if (!sets.map(s => s.name).includes(newSet.name) || !flag) {
-      let filter = [];
-      let languages = [];
-      let difficulty = 0;
-      newSet.questions.forEach(q => {
-        if (!filter.includes(questions[names.indexOf(q)].category))
-          filter.push(questions[names.indexOf(q)].category);
-        if (!filter.includes(questions[names.indexOf(q)].type))
-          filter.push(questions[names.indexOf(q)].type);
-        questions[names.indexOf(q)].languages.forEach(l => {
-          if (!languages.includes(l)) languages.push(l);
-        });
-        difficulty += questions[names.indexOf(q)].difficulty;
-      });
-      sets.push({
-        name: newSet.name,
-        questions: newSet.questions,
-        filter: filter,
-        languages: languages,
-        difficulty: difficulty / newSet.questions.length
-      });
-      await db
-        .collection("sets")
-        .doc(newSet.name)
-        .set(newSet);
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({ sets: firebase.firestore.FieldValue.increment(1) });
-      localStorage.setItem(
-        "set-version",
-        parseInt(localStorage.getItem("set-version"), 10) + 1
-      );
-      sets = sets.sort((a, b) =>
-        a.name < b.name ? -1 : a.name > b.name ? 1 : 0
-      );
-      if (versionState.q === "load")
-        localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("sets", JSON.stringify(sets));
-      return { q: questions, s: sets };
-    } else {
-      if (versionState.q === "load")
-        localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("sets", JSON.stringify(sets));
-      return {
-        q: questions,
-        s: sets,
-        error:
-          "Error: The set you are trying to add has already been added or one of the questions may no longer exist."
-      };
-    }
-  },
-
-  edit: async function editSet(newSet, original) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let categories = [];
-    if (
-      versionState.c === "load" ||
-      JSON.parse(localStorage.getItem("categories")) === null
-    ) {
-      await loadDB.categories().then(v => (categories = v));
-    } else {
-      categories = JSON.parse(localStorage.getItem("categories"));
-    }
-    let questions = [];
-    if (
-      versionState.q === "load" ||
-      JSON.parse(localStorage.getItem("questions")) === null
-    ) {
-      await loadDB.questions().then(v => (questions = v));
-    } else {
-      questions = JSON.parse(localStorage.getItem("questions"));
-    }
-    let sets = [];
-    if (
-      versionState.s === "load" ||
-      JSON.parse(localStorage.getItem("sets")) === null
-    ) {
-      await loadDB.sets().then(v => (sets = v));
-    } else {
-      sets = JSON.parse(localStorage.getItem("sets"));
-    }
-    let flag = false;
-    let names = questions.map(q => q.name);
-    newSet.questions.forEach(q => {
-      if (names.includes(q)) flag = true;
-    });
-    if (
-      !sets.map(s => s.name).includes(newSet.name) ||
-      newSet.name === original ||
-      !flag
-    ) {
-      let filter = [];
-      let languages = [];
-      let difficulty = 0;
-      newSet.questions.forEach(q => {
-        if (!filter.includes(questions[names.indexOf(q)].category))
-          filter.push(questions[names.indexOf(q)].category);
-        if (!filter.includes(questions[names.indexOf(q)].type))
-          filter.push(questions[names.indexOf(q)].type);
-        questions[names.indexOf(q)].languages.forEach(l => {
-          if (!languages.includes(l)) languages.push(l);
-        });
-        difficulty += questions[names.indexOf(q)].difficulty;
-      });
-      sets = sets.filter(set => set.name !== original);
-      sets.push({
-        name: newSet.name,
-        questions: newSet.questions,
-        filter: filter,
-        languages: languages,
-        difficulty: difficulty / newSet.questions.length
-      });
-      if (original !== newSet.name)
-        await db
-          .collection("sets")
-          .doc(original)
-          .delete();
-      await db
-        .collection("sets")
-        .doc(newSet.name)
-        .set(newSet);
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({ sets: firebase.firestore.FieldValue.increment(1) });
-      localStorage.setItem(
-        "set-version",
-        parseInt(localStorage.getItem("set-version"), 10) + 1
-      );
-      sets = sets.sort((a, b) =>
-        a.name < b.name ? -1 : a.name > b.name ? 1 : 0
-      );
-      if (versionState.q === "load")
-        localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("sets", JSON.stringify(sets));
-      return { q: questions, s: sets };
-    } else {
-      if (versionState.q === "load")
-        localStorage.setItem("questions", JSON.stringify(questions));
-      if (versionState.c === "load")
-        localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("sets", JSON.stringify(sets));
-      return {
-        q: questions,
-        s: sets,
-        error:
-          "Error: The name is already in use or a question no longer exists."
-      };
-    }
-  },
-
-  delete: async function deleteSet(original) {
-    let versionState = {};
-    await version.check().then(v => (versionState = v));
-    let sets = [];
-    if (
-      versionState.s === "load" ||
-      JSON.parse(localStorage.getItem("sets")) === null
-    ) {
-      await loadDB.sets().then(v => (sets = v));
-    } else {
-      sets = JSON.parse(localStorage.getItem("sets"));
-    }
-    if (sets.map(s => s.name).includes(original)) {
-      sets = sets.filter(set => set.name !== original);
-      await db
-        .collection("sets")
-        .doc(original)
-        .delete();
-      await db
-        .collection("version")
-        .doc("versionCheck")
-        .update({ sets: firebase.firestore.FieldValue.increment(1) });
-      localStorage.setItem(
-        "set-version",
-        parseInt(localStorage.getItem("set-version"), 10) + 1
-      );
-      sets = sets.sort((a, b) =>
-        a.name < b.name ? -1 : a.name > b.name ? 1 : 0
-      );
-      localStorage.setItem("sets", JSON.stringify(sets));
-      return { s: sets };
-    } else {
-      localStorage.setItem("sets", JSON.stringify(sets));
-      return { s: sets };
-    }
-  }
-};
-
-export { loadDB, version, category, question, set };
+export { loadDB, version };
