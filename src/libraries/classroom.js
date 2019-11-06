@@ -31,26 +31,42 @@ const classroom = {
     } else {
       classes = idbClasses.classes;
     }
-    let usernames = users.filter(u => u.username);
+    let usernames = users.map(u => u.username);
     let newCourse = {};
     newStudent.courses.forEach(c => {
       if (c.name === classroom.name) newCourse = c;
     });
+
+    console.log(usernames);
+    console.log("" + usernames.includes(newStudent.username));
+    console.log("" + !classroom.students.includes(newStudent.username));
+    console.log(
+      "" + newCourse.classes !== undefined ||
+        !newCourse.classes.includes(classroom.time)
+    );
     if (
       usernames.includes(newStudent.username) &&
       !classroom.students.includes(newStudent.username) &&
-      !newCourse.classes.includes(classroom.time)
+      (newCourse.classes === undefined ||
+        !newCourse.classes.includes(classroom.time))
     ) {
+      console.log(1);
       classroom.students.push(newStudent.username);
-      newStudent.courses = newStudent.courses.map(c => {
-        if (c.course === classroom.course)
-          return { ...c, classes: [...c.classes, classroom.time] };
-        else return c;
-      });
-      await db
-        .collection("users")
-        .doc(newStudent.username)
-        .set(newStudent);
+      if (newCourse.course === undefined) {
+        newCourse = { course: classroom.course, classes: [classroom.time] };
+        newStudent.courses = [...newStudent.courses, newCourse];
+      } else {
+        newStudent.courses = newStudent.courses.map(c => {
+          if (c.course === classroom.course)
+            return { ...c, classes: [...c.classes, classroom.time] };
+          else return c;
+        });
+      }
+      console.log(newStudent);
+      // await db
+      //   .collection("users")
+      //   .doc(newStudent.username)
+      //   .set(newStudent);
     } else {
     }
   }
