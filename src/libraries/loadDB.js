@@ -164,7 +164,8 @@ const loadDB = {
       classes.push({
         course: c.data().course,
         students: c.data().students,
-        time: c.data().time
+        name: c.data().name,
+        assignments: c.data().assignments
       });
     });
     idb.classes.put({ all: "classes", classes });

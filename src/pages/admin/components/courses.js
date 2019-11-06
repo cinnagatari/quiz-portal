@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { version, loadDB } from "../../../libraries/loadDB";
 import { course } from "../../../libraries/course";
 import { classroom } from "../../../libraries/classroom";
@@ -11,7 +11,7 @@ export default function Courses() {
   let [users, setUsers] = useState([]);
   let [currentC, setCurrentC] = useState(-1);
   let [currentClass, setCurrentClass] = useState("");
-  let [studentName, setStudentName] = useState("");
+  let [currentStudent, setCurrentStudent] = useState("");
   let [errorMessage, setErrorMessage] = useState("");
   let user = useContext(UserContext);
 
@@ -39,19 +39,36 @@ export default function Courses() {
     }
     let users = await idb.users.get("users").then(u => u);
     if (versionState.u === "load" || users === undefined) {
-      loadDB.users().then(users => setUsers(users));
+      await loadDB.users().then(users => setUsers(users));
     } else {
       setUsers(users.users);
     }
   }
 
   async function addStudent(student) {
-      console.log(student);
     if (!currentClass.students.includes(student.username)) {
-      classroom.addStudent(student, currentClass);
-      setErrorMessage("");
+      await classroom.addStudent(student, currentClass).then(newData => {
+        if (newData.error !== undefined) setErrorMessage(newData.error);
+        else setErrorMessage("");
+        setClasses(newData.c);
+        setUsers(newData.u);
+      });
     } else {
       setErrorMessage("Student is already in this class.");
+    }
+  }
+
+  async function deleteStudent(student) {
+    console.log(1);
+    if (currentClass.students.includes(student.username)) {
+      await classroom.deleteStudent(student, currentClass).then(newData => {
+        if (newData.error !== undefined) setErrorMessage(newData.error);
+        else setErrorMessage("");
+        setClasses(newData.c);
+        setUsers(newData.u);
+      });
+    } else {
+      setErrorMessage("Student is not in this class.");
     }
   }
 
@@ -80,10 +97,10 @@ export default function Courses() {
                 return (
                   <button
                     className={"btn-medium btn-" + user.theme}
-                    key={courses[currentC].name + "-class-" + c.time}
+                    key={courses[currentC].name + "-class-" + c.name}
                     onClick={() => setCurrentClass(c)}
                   >
-                    {c.time}
+                    {c.name}
                   </button>
                 );
               }
@@ -94,7 +111,7 @@ export default function Courses() {
       {currentClass !== "" && (
         <div className="class">
           <p className={"class-title bg-1-" + user.theme}>
-            {currentClass.time}
+            {currentClass.name}
           </p>
           <div className="class-students">
             {users.map(u => {
@@ -103,8 +120,20 @@ export default function Courses() {
                   <button
                     key={"current-user-" + u.username}
                     className={"btn-small btn-" + user.theme}
+                    onClick={() => {
+                      if (
+                        currentStudent === "" ||
+                        currentStudent.username !== u.username
+                      )
+                        return setCurrentStudent(u);
+                      else return deleteStudent(u);
+                    }}
                   >
-                    {u.name}
+                    {u.name}{" "}
+                    {currentStudent !== "" &&
+                    currentStudent.username === u.username
+                      ? "(x)"
+                      : ""}
                   </button>
                 );
               }
@@ -149,7 +178,6 @@ function StudentSelector({ students, addStudent, errorMessage, user }) {
           else setCurrentStudent(currentStudent + 1);
         }
         if (ev.key === "Enter") {
-          console.log(students[currentStudent]);
           addStudent(students[currentStudent]);
         }
         return currentStudent;
