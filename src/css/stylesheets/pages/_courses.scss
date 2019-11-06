@@ -39,6 +39,58 @@
     }
   }
   .class {
-      
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    .class-title {
+      margin: 5px;
+      padding: 5px;
+      border-radius: 10px;
+      font-size: $text-base-size * 2;
+      align-self: flex-start;
+    }
+    .class-students {
+      display: flex;
+      flex-direction: row;
+      padding: 5px;
+      margin: 5px;
+    }
+    .add-students {
+      display: flex;
+      flex-direction: column;
+      .a-title {
+        margin: 5px;
+        padding: 5px;
+        border-radius: 10px;
+        font-size: $text-base-size * 2;
+        align-self: flex-start;
+      }
+      .add-student {
+        display: flex;
+        flex-direction: column;
+        .input-container {
+          display: flex;
+          flex-direction: row;
+          padding: 5px;
+          margin: 5px;
+          .add-input {
+            align-self: flex-start;
+          }
+        }
+      }
+    }
+    .student-selector {
+      display: flex;
+      flex-direction: column;
+      padding: 5px;
+      margin: 5px;
+      max-height: 55vh;
+      overflow: auto;
+      .s-option {
+        display: flex;
+        flex-direction: row;
+        align-self: flex-start;
+      }
+    }
   }
 }

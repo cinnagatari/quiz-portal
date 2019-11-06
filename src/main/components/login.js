@@ -14,7 +14,7 @@ export default function Login() {
       if (mounted) {
         if (user) {
           async function loadUser() {
-            let u = await auth.currentUser;
+            let u = auth.currentUser;
             login.setUser(u.email.substring(0, u.email.length - 12));
             let userSS = await db
               .collection("users")
@@ -71,7 +71,9 @@ export default function Login() {
                 />
               </div>
             </div>
-            <button submit="submit">Login</button>
+            <button className={"btn-small btn-" + login.theme} submit="submit">
+              Login
+            </button>
           </div>
         </form>
       )}
