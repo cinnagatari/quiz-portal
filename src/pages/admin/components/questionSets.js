@@ -11,7 +11,7 @@ import {
   faArrowAltCircleRight
 } from "@fortawesome/free-regular-svg-icons";
 import UserContext from "../../../utils/userContext";
-import Filter from "../../../libraries/filter";
+import Filter from "../../components/filter";
 
 const LANGUAGES = ["java", "python", "javascript"];
 const ICONS = [faJava, faPython, faJs];

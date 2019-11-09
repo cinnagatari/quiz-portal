@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
+import ReactDOM from "react-dom";
+import axios from "axios";
 import brace from "brace";
 import AceEditor from "react-ace";
 import SimpleMDE from "react-simplemde-editor";
@@ -14,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faJava, faPython, faJs } from "@fortawesome/free-brands-svg-icons";
 
 const LANGUAGES = ["java", "python", "javascript"];
+const LANGUAGES_IDS = [27, 37, 30];
 const ICONS = [faJava, faPython, faJs];
 
 export default function QuestionEditor({
@@ -34,11 +37,16 @@ export default function QuestionEditor({
     );
     let [lang, setLang] = useState(-1);
     let [solution, setSolution] = useState({});
+    let [solutionAnswers, setSolutionAnswers] = useState({});
+    let [testCases, setTestCases] = useState({});
     let [placeholder, setPlaceholder] = useState({});
     let [answers, setAnswers] = useState({});
     let [difficulty, setDifficulty] = useState(-1);
     let [submitFailed, setSubmitFailed] = useState(false);
     let [reload, setReload] = useState(false);
+    let [statusText, setStatusText] = useState("");
+    let [stdout, setStdout] = useState("");
+    let [compile_output, setCompileOutput] = useState("");
 
     useEffect(() => {
         if (editQuestion !== undefined) {
@@ -54,11 +62,48 @@ export default function QuestionEditor({
             setLanguages(temp);
             setLang(0);
             setSolution({ ...editQuestion.solution });
+            setSolutionAnswers({ ...editQuestion.solutionAnswers });
             setPlaceholder({ ...editQuestion.placeholder });
             setAnswers({ ...editQuestion.answers });
             setDifficulty(editQuestion.difficulty);
         }
     }, []);
+
+    useEffect(() => {
+        if (LANGUAGES[lang] !== undefined && stdout !== null) {
+            let tempSA = { ...solutionAnswers };
+            tempSA[LANGUAGES[lang]] = stdout;
+            setSolutionAnswers(tempSA);
+        }
+    }, [stdout]);
+
+    function submitCode(code) {
+        setStdout("");
+        axios
+            .post("https://api.judge0.com/submissions/", {
+                source_code: code,
+                language_id: LANGUAGES_IDS[lang]
+            })
+            .then(res => {
+                setStatusText("Submitting");
+                trackSubmission(res.data.token);
+            })
+            .catch(err => console.log(err));
+    }
+
+    function trackSubmission(token) {
+        setTimeout(() => {
+            axios
+                .get(`https://api.judge0.com/submissions/${token}`)
+                .then(res => {
+                    setStatusText(res.data.status.description);
+                    if (res.data.status.id <= 2) trackSubmission(token);
+
+                    setStdout(res.data.stdout);
+                    setCompileOutput(res.data.compile_output);
+                });
+        }, 500);
+    }
 
     function onChangeQuestion(newValue) {
         let temp = question;
@@ -95,7 +140,17 @@ export default function QuestionEditor({
         Object.keys(solution).forEach(s => {
             if (solution[s].length === 0) flag = true;
         });
+        Object.keys(solutionAnswers).forEach(s => {
+            if (solutionAnswers[s].length === 0) flag = true;
+        });
         return flag;
+    }
+
+    function onChangeTestCase(newValue) {
+        let temp = testCases;
+        temp[LANGUAGES[lang]] = newValue;
+        setTestCases(temp);
+        setReload(!reload);
     }
 
     function onChangePlaceholder(newValue) {
@@ -154,7 +209,6 @@ export default function QuestionEditor({
     }
 
     function setLength(len) {
-        console.log(len);
         let temp = { ...answers };
         let tempLen = temp[LANGUAGES[lang]].length;
         if (len > temp[LANGUAGES[lang]].length) {
@@ -172,6 +226,8 @@ export default function QuestionEditor({
         let temp = [...languages];
         let tempQ = { ...question };
         let tempS = { ...solution };
+        let tempSA = { ...solutionAnswers };
+        let tempT = { ...testCases };
         let tempP = { ...placeholder };
         let tempA = { ...answers };
         if (temp[index] && lang === index) {
@@ -189,12 +245,16 @@ export default function QuestionEditor({
         if (!temp[index]) {
             tempQ[LANGUAGES[index]] = "";
             tempS[LANGUAGES[index]] = "";
+            tempSA[LANGUAGES[index]] = "";
+            tempT[LANGUAGES[index]] = "";
             tempP[LANGUAGES[index]] = "";
             tempA[LANGUAGES[index]] = ["", "", "", ""];
             tempA[LANGUAGES[index] + "-length"] = 4;
         } else {
             delete tempQ[LANGUAGES[index]];
             delete tempS[LANGUAGES[index]];
+            delete tempSA[LANGUAGES[index]];
+            delete tempT[LANGUAGES[index]];
             delete tempP[LANGUAGES[index]];
             delete tempA[LANGUAGES[index]];
             delete tempA[LANGUAGES[index] + "-length"];
@@ -203,12 +263,13 @@ export default function QuestionEditor({
         setLanguages(temp);
         setQuestion(tempQ);
         setSolution(tempS);
+        setSolutionAnswers(tempSA);
+        setTestCases(tempT);
         setPlaceholder(tempP);
         setAnswers(tempA);
     }
 
     function submit() {
-        console.log(1);
         if (
             name.length === 0 ||
             (!oName === name && !names.includes(name)) ||
@@ -240,6 +301,7 @@ export default function QuestionEditor({
                 question: question,
                 languages: temp,
                 solution: solution,
+                solutionAnswers: solutionAnswers,
                 placeholder: placeholder,
                 answers: answers
             };
@@ -455,10 +517,10 @@ export default function QuestionEditor({
                                             value={solution[LANGUAGES[lang]]}
                                             onChange={onChangeSolution}
                                             theme="github"
-                                            fontSize="18px"
+                                            fontSize="14px"
                                             showPrintMargin={false}
                                             style={{
-                                                height: "200px",
+                                                height: "300px",
                                                 width: "80%",
                                                 borderRadius: "10px"
                                             }}
@@ -466,6 +528,136 @@ export default function QuestionEditor({
                                                 $blockScrolling: Infinity
                                             }}
                                         />
+                                        <AceEditor
+                                            key={LANGUAGES[lang] + "test case"}
+                                            mode={LANGUAGES[lang]}
+                                            placeholder="test cases"
+                                            value={testCases[LANGUAGES[lang]]}
+                                            onChange={onChangeTestCase}
+                                            theme="github"
+                                            fontSize="14px"
+                                            showPrintMargin={false}
+                                            style={{
+                                                marginTop: 5,
+                                                height: "300px",
+                                                width: "80%",
+                                                borderRadius: "10px"
+                                            }}
+                                            editorProps={{
+                                                $blockScrolling: Infinity
+                                            }}
+                                        />
+                                        <div className="sa-answers">
+                                            <div className="sa-submit">
+                                                {statusText !== "" &&
+                                                    statusText !==
+                                                        "Accepted" && (
+                                                        <p
+                                                            className={
+                                                                "center txt-1 bg-3-" +
+                                                                user.theme
+                                                            }
+                                                        >
+                                                            Status: {statusText}
+                                                        </p>
+                                                    )}
+                                                {(statusText === "" ||
+                                                    statusText === "Accepted" ||
+                                                    statusText.indexOf(
+                                                        "Error"
+                                                    ) !== -1) && (
+                                                    <button
+                                                        style={{
+                                                            alignSelf:
+                                                                "flex-end"
+                                                        }}
+                                                        className={
+                                                            "btn-small bg-3-" +
+                                                            user.theme
+                                                        }
+                                                        onClick={() =>
+                                                            submitCode(
+                                                                solution[
+                                                                    LANGUAGES[
+                                                                        lang
+                                                                    ]
+                                                                ].substring(
+                                                                    0,
+                                                                    solution[
+                                                                        LANGUAGES[
+                                                                            lang
+                                                                        ]
+                                                                    ].indexOf(
+                                                                        "Main"
+                                                                    ) + 4
+                                                                ) +
+                                                                    "2" +
+                                                                    solution[
+                                                                        LANGUAGES[
+                                                                            lang
+                                                                        ]
+                                                                    ].substring(
+                                                                        solution[
+                                                                            LANGUAGES[
+                                                                                lang
+                                                                            ]
+                                                                        ].indexOf(
+                                                                            "Main"
+                                                                        ) + 4
+                                                                    ) +
+                                                                    placeholder[
+                                                                        LANGUAGES[
+                                                                            lang
+                                                                        ]
+                                                                    ]
+                                                            )
+                                                        }
+                                                    >
+                                                        Run Code
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="sa-result">
+                                                {solutionAnswers[
+                                                    LANGUAGES[lang]
+                                                ] !== "" && (
+                                                    <AceEditor
+                                                        key={
+                                                            LANGUAGES[lang] +
+                                                            "submitted answer"
+                                                        }
+                                                        mode={LANGUAGES[lang]}
+                                                        value={
+                                                            compile_output !==
+                                                                null &&
+                                                            statusText.includes(
+                                                                "Error"
+                                                            )
+                                                                ? compile_output
+                                                                : solutionAnswers[
+                                                                      LANGUAGES[
+                                                                          lang
+                                                                      ]
+                                                                  ]
+                                                        }
+                                                        style={{
+                                                            height: "300px",
+                                                            width: "100%",
+                                                            borderRadius: "10px"
+                                                        }}
+                                                        fontSize="14px"
+                                                        theme="github"
+                                                        showPrintMargin={false}
+                                                        setOptions={{
+                                                            autoScrollEditorIntoView: false
+                                                        }}
+                                                        editorProps={{
+                                                            $blockScrolling: Infinity
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
                                         <div
                                             style={{
                                                 width: "80%",
@@ -495,10 +687,10 @@ export default function QuestionEditor({
                                             onChange={onChangePlaceholder}
                                             mode={LANGUAGES[lang]}
                                             theme="github"
-                                            fontSize="18px"
+                                            fontSize="14px"
                                             showPrintMargin={false}
                                             style={{
-                                                height: "200px",
+                                                height: "300px",
                                                 width: "80%",
                                                 borderRadius: "10px"
                                             }}
@@ -572,7 +764,7 @@ export default function QuestionEditor({
                                                         mode={LANGUAGES[lang]}
                                                         theme="github"
                                                         maxLines={Infinity}
-                                                        fontSize="18px"
+                                                        fontSize="14px"
                                                         showPrintMargin={false}
                                                         setOptions={{
                                                             autoScrollEditorIntoView: false

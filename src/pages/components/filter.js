@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
-import { loadDB, version } from "./loadDB";
-import UserContext from "../utils/userContext";
-import idb from "../utils/indexedDB";
+import { loadDB, version } from "../../libraries/loadDB";
+import UserContext from "../../utils/userContext";
+import idb from "../../utils/indexedDB";
 
 let LANGUAGES = ["java", "python", "javascript"];
 let DIFFICULTY = new Array(10).fill(0).map((v, i) => i + 1);
@@ -33,10 +33,10 @@ export default function Filter({
         let sections = [];
         categories.forEach(c => {
             if (
-                !sections.includes(c.substring(0, c.indexOf("-"))) &&
+                !sections.includes(c.substring(0, c.indexOf(" - "))) &&
                 c !== "no category"
             )
-                sections.push(c.substring(0, c.indexOf("-")));
+                sections.push(c.substring(0, c.indexOf(" - ")));
         });
         setSections(sections);
     }, [categories]);
@@ -204,7 +204,7 @@ export default function Filter({
                         {categories.map(c => {
                             if (
                                 sections[currentS] ===
-                                c.substring(0, c.indexOf("-"))
+                                c.substring(0, c.indexOf(" - "))
                             ) {
                                 return (
                                     <button
