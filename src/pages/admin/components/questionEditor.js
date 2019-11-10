@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import ReactDOM from "react-dom";
 import axios from "axios";
 import brace from "brace";
 import AceEditor from "react-ace";
