@@ -6,8 +6,7 @@ export default function Test() {
 
     return (
         <div>
-            <textarea value={code} onChange={ev => setCode(ev.target.value)} />
-            <Submit defaultValue={code} language={"python"}/>
+            <Submit defaultValue={code} language={"java"}/>
         </div>
     );
 }

@@ -1,0 +1,28 @@
+import java.util.*;
+import java.io.*;
+
+class Main {
+    
+    static int cnt = 0;
+    
+    public static void main(String[] args) throws Exception {
+        BufferedReader f = new BufferedReader(new InputStreamReader(System.in));
+        
+        System.out.println(solve(Integer.parseInt(f.readLine())));
+        System.out.println(cnt);
+        
+        f.close();
+    }
+    
+    static String solve(int a) {
+        cnt++;
+        if(a == 1) return "1";
+        return "" + a + solve(a - 1);
+    }
+
+    static int factorial(int a) {
+        if(a == 1) return a;
+        
+        return a * factorial(a - 1);
+    }
+}
