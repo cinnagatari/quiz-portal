@@ -1,0 +1,23 @@
+import sys
+
+def correct(a):
+    print(a * 2)
+
+def wrong(a):
+    print(a)
+
+def runtime(a):
+    a = 0;
+    print(a / a)
+
+def timeout(a):
+    ar = [1] * 1000000
+    for i in ar:
+        for j in ar:
+            for k in ar:
+                ar = ar
+
+correct(int(sys.stdin.readline()))
+# wrong(int(sys.stdin.readline()))
+# runtime(int(sys.stdin.readline()))
+# timeout(int(sys.stdin.readline()))
