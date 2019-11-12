@@ -17,3 +17,12 @@
         justify-content: center;
     }
 }
+
+.submit-result {
+    width: 60%;
+    flex-direction: column;
+    padding: 10px;
+    .result-title {
+        align-self: flex-start;
+    }
+}

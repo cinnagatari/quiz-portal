@@ -6,7 +6,7 @@ export default function Test() {
 
     return (
         <div>
-            <Submit defaultValue={code} language={"python"}/>
+            <Submit defaultValue={code} language={"java"}/>
         </div>
     );
 }
