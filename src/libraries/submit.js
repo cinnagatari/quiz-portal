@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import axios from "axios";
 import brace from "brace";
 import AceEditor from "react-ace";
@@ -75,8 +75,7 @@ export default function Submit({ question, setResults, language }) {
   let [processing, setProcessing] = useState(false);
   let [result, setResult] = useState([0, 0]);
   let user = useContext(UserContext);
-
-
+  let localQ = {};
   
 
   async function run() {
@@ -96,8 +95,7 @@ export default function Submit({ question, setResults, language }) {
   }
 
   function update(type, value, index, hidden) {
-    console.log(20);
-    let temp = { ...q };
+    let temp = { ...localQ };
     if (hidden) {
       temp.hiddenResults[index][type] = value;
       if (value === "Accepted") {
@@ -139,7 +137,6 @@ export default function Submit({ question, setResults, language }) {
 
   async function reset() {
     let temp = { ...q };
-    console.log(1);
     temp.results = new Array(temp.tests.length).fill(0).map(r => {
       return {
         status: "",
@@ -155,14 +152,12 @@ export default function Submit({ question, setResults, language }) {
       };
     });
     temp.result = [0, 0];
-    console.log(temp);
+    localQ = temp;
     setQ(temp);
-    console.log(q);
     setCurrentT(-1);
   }
 
   function submitCode(test, index, hidden) {
-    console.log(10);
     setProcessing(true);
     axios
       .post("https://api.judge0.com/submissions/", {
@@ -197,7 +192,6 @@ export default function Submit({ question, setResults, language }) {
     }, 500);
   }
 
-  console.log(q);
   return (
     <div className="center submit-code">
       <AceEditor
