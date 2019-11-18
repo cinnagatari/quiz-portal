@@ -36,7 +36,9 @@ export default function QuestionEditor({
   let [solution, setSolution] = useState({});
   let [solutionAnswers, setSolutionAnswers] = useState({});
   let [tests, setTests] = useState({});
+  let [testAnswers, setTestAnswers] = useState({});
   let [hiddenTests, setHiddenTests] = useState({});
+  let [hiddenTestAnswers, setHiddenTestAnswers] = useState({});
   let [placeholder, setPlaceholder] = useState({});
   let [answers, setAnswers] = useState({});
   let [difficulty, setDifficulty] = useState(-1);
@@ -114,8 +116,11 @@ export default function QuestionEditor({
 
   function addTestCase() {
     let temp = { ...tests };
+    let tempA = { ...testAnswers };
     temp[LANGUAGES[lang]].push("");
+    tempA[LANGUAGES[lang]].push("");
     setTests(temp);
+    setTestAnswers(tempA);
   }
 
   function onChangeHiddenTests(newValue, index) {
@@ -127,7 +132,9 @@ export default function QuestionEditor({
 
   function addHiddenTestCase() {
     let temp = { ...hiddenTests };
+    let tempA = { ...hiddenTestAnswers };
     temp[LANGUAGES[lang]].push("");
+    tempA[LANGUAGES[lang]].push("");
     setHiddenTests(temp);
   }
 
@@ -217,7 +224,9 @@ export default function QuestionEditor({
     let tempS = { ...solution };
     let tempSA = { ...solutionAnswers };
     let tempT = { ...tests };
+    let tempTA = { ...testAnswers };
     let tempHT = { ...hiddenTests };
+    let tempHTA = { ...hiddenTestAnswers };
     let tempP = { ...placeholder };
     let tempA = { ...answers };
     if (temp[index] && lang === index) {
@@ -237,7 +246,9 @@ export default function QuestionEditor({
       tempS[LANGUAGES[index]] = "";
       tempSA[LANGUAGES[index]] = "";
       tempT[LANGUAGES[index]] = [""];
+      tempTA[LANGUAGES[index]] = [""];
       tempHT[LANGUAGES[index]] = [""];
+      tempHTA[LANGUAGES[index]] = [""];
       tempP[LANGUAGES[index]] = "";
       tempA[LANGUAGES[index]] = ["", "", "", ""];
       tempA[LANGUAGES[index] + "-length"] = 4;
@@ -246,7 +257,9 @@ export default function QuestionEditor({
       delete tempS[LANGUAGES[index]];
       delete tempSA[LANGUAGES[index]];
       delete tempT[LANGUAGES[index]];
+      delete tempTA[LANGUAGES[index]];
       delete tempHT[LANGUAGES[index]];
+      delete tempHTA[LANGUAGES[index]];
       delete tempP[LANGUAGES[index]];
       delete tempA[LANGUAGES[index]];
       delete tempA[LANGUAGES[index] + "-length"];
@@ -257,7 +270,9 @@ export default function QuestionEditor({
     setSolution(tempS);
     setSolutionAnswers(tempSA);
     setTests(tempT);
+    setTestAnswers(tempTA);
     setHiddenTests(tempHT);
+    setHiddenTestAnswers(tempHTA);
     setPlaceholder(tempP);
     setAnswers(tempA);
   }
@@ -332,12 +347,15 @@ export default function QuestionEditor({
             setAllQuestions={setAllQuestions}
             onChangeQuestion={onChangeQuestion}
             tests={tests}
+            testAnswers={testAnswers}
             onChangeTests={onChangeTests}
             addTestCase={() => addTestCase()}
             hiddenTests={hiddenTests}
+            hiddenTestAnswers={hiddenTestAnswers}
             onChangeHiddenTests={onChangeHiddenTests}
             addHiddenTestCase={() => addHiddenTestCase()}
-            setAllTests={setAllTests}
+            setAllTests={() => setAllTests()}
+            type={type}
             user={user}
           />
         )}
@@ -542,12 +560,15 @@ function EditQuestion({
   setAllQuestions,
   onChangeQuestion,
   tests,
+  testAnswers,
   onChangeTests,
   addTestCase,
   hiddenTests,
+  hiddenTestAnswers,
   onChangeHiddenTest,
   addHiddenTestCase,
   setAllTests,
+  type,
   user
 }) {
   console.log(tests);
@@ -599,7 +620,7 @@ function EditQuestion({
               />
             </div>
           )}
-          {lang !== -1 && (
+          {lang !== -1  && type === "sa" && (
             <div
               className="center test-cases"
               style={{ width: "100%", flexDirection: "column" }}
@@ -626,17 +647,23 @@ function EditQuestion({
                   }}
                 />
               ))}
-              <div style={{ width: "80%", justifyContent: "flex-start" }}>
+              <div style={{ width: "80%", display: 'flex', justifyContent: "space-between" }}>
                 <button
                   onClick={addTestCase}
                   className={"btn-small bg-3-" + user.theme}
                 >
                   add
                 </button>
+                <button
+                  onClick={setAllTests}
+                  className={"btn-small bg-3-" + user.theme}
+                >
+                  apply test cases to all languages
+                </button>
               </div>
             </div>
           )}
-          {lang !== -1 && (
+          {lang !== -1 && type === "sa" && (
             <div className="center test-cases">
               {hiddenTests[LANGUAGES[lang]].map((test, i) => (
                 <AceEditor
@@ -668,6 +695,60 @@ function EditQuestion({
                   add
                 </button>
               </div>
+            </div>
+          )}
+          {lang !== -1 && type === "sa" && (
+            <div className="center test-cases">
+              {testAnswers[LANGUAGES[lang]].map((test, i) => (
+                <AceEditor
+                  key={LANGUAGES[lang] + "test case answers" + i}
+                  mode={LANGUAGES[lang]}
+                  value={testAnswers[LANGUAGES[lang]][i]}
+                  theme="github"
+                  fontSize="14px"
+                  showPrintMargin={false}
+                  maxLines={50}
+                  style={{
+                    height: "300px",
+                    width: "80%",
+                    borderRadius: "10px",
+                    marginBottom: 5
+                  }}
+                  editorProps={{
+                    $blockScrolling: Infinity
+                  }}
+                  setOptions={{
+                    readOnly: true
+                  }}
+                />
+              ))}
+            </div>
+          )}{lang !== -1 && type === "sa" && (
+            <div className="center test-cases">
+              {hiddenTestAnswers[LANGUAGES[lang]].map((test, i) => (
+                <AceEditor
+                  key={LANGUAGES[lang] + "hidden test case answers" + i}
+                  mode={LANGUAGES[lang]}
+                  value={hiddenTestAnswers[LANGUAGES[lang]][i]}
+                  theme="github"
+                  fontSize="14px"
+                  showPrintMargin={false}
+                  maxLines={50}
+                  style={{
+                    height: "300px",
+                    width: "80%",
+                    borderRadius: "10px",
+                    marginBottom: 5
+                  }}
+                  editorProps={{
+                    $blockScrolling: Infinity
+                  }}
+                  setOptions={{
+                    readOnly: true
+                  }}
+                />
+              ))}
+              
             </div>
           )}
         </div>

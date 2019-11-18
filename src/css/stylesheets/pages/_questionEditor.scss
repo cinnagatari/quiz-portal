@@ -42,6 +42,10 @@
         flex-direction: column;
         width: 100%;
         padding: 5px;
+        .buttons {
+          width: 80%;
+          justify-content: space-between;
+        }
       }
     }
 
