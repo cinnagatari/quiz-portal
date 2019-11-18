@@ -112,11 +112,23 @@ export default function QuestionEditor({
     setReload(!reload);
   }
 
+  function addTestCase() {
+    let temp = { ...tests };
+    temp[LANGUAGES[lang]].push("");
+    setTests(temp);
+  }
+
   function onChangeHiddenTests(newValue, index) {
     let temp = hiddenTests;
     temp[LANGUAGES[lang]][index] = newValue;
     setHiddenTests(temp);
     setReload(!reload);
+  }
+
+  function addHiddenTestCase() {
+    let temp = { ...hiddenTests };
+    temp[LANGUAGES[lang]].push("");
+    setHiddenTests(temp);
   }
 
   function setAllTests() {
@@ -321,8 +333,10 @@ export default function QuestionEditor({
             onChangeQuestion={onChangeQuestion}
             tests={tests}
             onChangeTests={onChangeTests}
+            addTestCase={() => addTestCase()}
             hiddenTests={hiddenTests}
             onChangeHiddenTests={onChangeHiddenTests}
+            addHiddenTestCase={() => addHiddenTestCase()}
             setAllTests={setAllTests}
             user={user}
           />
@@ -529,12 +543,13 @@ function EditQuestion({
   onChangeQuestion,
   tests,
   onChangeTests,
+  addTestCase,
   hiddenTests,
   onChangeHiddenTest,
+  addHiddenTestCase,
   setAllTests,
   user
 }) {
-
   console.log(tests);
   console.log(hiddenTests);
   return (
@@ -585,7 +600,10 @@ function EditQuestion({
             </div>
           )}
           {lang !== -1 && (
-            <div className="center" style={{width: "100%", flexDirection: "column"}}>
+            <div
+              className="center test-cases"
+              style={{ width: "100%", flexDirection: "column" }}
+            >
               {tests[LANGUAGES[lang]].map((test, i) => (
                 <AceEditor
                   key={LANGUAGES[lang] + "test case" + i}
@@ -598,21 +616,28 @@ function EditQuestion({
                   showPrintMargin={false}
                   maxLines={50}
                   style={{
-                    marginBottom: 5,
                     height: "300px",
                     width: "80%",
-                    borderRadius: "10px"
+                    borderRadius: "10px",
+                    marginBottom: 5
                   }}
                   editorProps={{
                     $blockScrolling: Infinity
                   }}
                 />
               ))}
-              <button className={"btn-small bg-3-" + user.theme}>add</button>
+              <div style={{ width: "80%", justifyContent: "flex-start" }}>
+                <button
+                  onClick={addTestCase}
+                  className={"btn-small bg-3-" + user.theme}
+                >
+                  add
+                </button>
+              </div>
             </div>
           )}
           {lang !== -1 && (
-            <div>
+            <div className="center test-cases">
               {hiddenTests[LANGUAGES[lang]].map((test, i) => (
                 <AceEditor
                   key={LANGUAGES[lang] + "hidden test case" + i}
@@ -625,17 +650,24 @@ function EditQuestion({
                   showPrintMargin={false}
                   maxLines={50}
                   style={{
-                    marginBottom: 5,
                     height: "300px",
                     width: "80%",
-                    borderRadius: "10px"
+                    borderRadius: "10px",
+                    marginBottom: 5
                   }}
                   editorProps={{
                     $blockScrolling: Infinity
                   }}
                 />
               ))}
-              <button className={"btn-small bg-2-" + user.theme}>add</button>
+              <div style={{ width: "80%", justifyContent: "flex-start" }}>
+                <button
+                  onClick={addHiddenTestCase}
+                  className={"btn-small bg-3-" + user.theme}
+                >
+                  add
+                </button>
+              </div>
             </div>
           )}
         </div>
