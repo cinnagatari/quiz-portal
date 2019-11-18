@@ -42,9 +42,6 @@ export default function QuestionEditor({
   let [difficulty, setDifficulty] = useState(-1);
   let [submitFailed, setSubmitFailed] = useState(false);
   let [reload, setReload] = useState(false);
-  let [statusText, setStatusText] = useState("");
-  let [stdout, setStdout] = useState("");
-  let [compile_output, setCompileOutput] = useState("");
 
   useEffect(() => {
     if (editQuestion !== undefined) {
@@ -66,14 +63,6 @@ export default function QuestionEditor({
       setDifficulty(editQuestion.difficulty);
     }
   }, []);
-
-  useEffect(() => {
-    if (LANGUAGES[lang] !== undefined && stdout !== null) {
-      let tempSA = { ...solutionAnswers };
-      tempSA[LANGUAGES[lang]] = stdout;
-      setSolutionAnswers(tempSA);
-    }
-  }, [stdout]);
 
   function onChangeQuestion(newValue) {
     let temp = question;
@@ -116,18 +105,29 @@ export default function QuestionEditor({
     return flag;
   }
 
-  function onChangeTest(newValue, index) {
+  function onChangeTests(newValue, index) {
     let temp = tests;
     temp[LANGUAGES[lang]][index] = newValue;
     setTests(temp);
     setReload(!reload);
   }
 
-  function onChangeHiddenTest(newValue, index) {
+  function onChangeHiddenTests(newValue, index) {
     let temp = hiddenTests;
     temp[LANGUAGES[lang]][index] = newValue;
     setHiddenTests(temp);
     setReload(!reload);
+  }
+
+  function setAllTests() {
+    let temp = { ...tests };
+    let tempH = { ...hiddenTests };
+    Object.keys(temp).forEach(key => {
+      temp[key] = tests[LANGUAGES[lang]];
+      tempH[key] = hiddenTests[LANGUAGES[lang]];
+    });
+    setTests(temp);
+    setHiddenTests(tempH);
   }
 
   function onChangePlaceholder(newValue) {
@@ -319,6 +319,11 @@ export default function QuestionEditor({
             setLang={setLang}
             setAllQuestions={setAllQuestions}
             onChangeQuestion={onChangeQuestion}
+            tests={tests}
+            onChangeTests={onChangeTests}
+            hiddenTests={hiddenTests}
+            onChangeHiddenTests={onChangeHiddenTests}
+            setAllTests={setAllTests}
             user={user}
           />
         )}
@@ -350,7 +355,7 @@ export default function QuestionEditor({
               }
             /> */}
         {lang !== -1 && (
-          <div className={"center question-preview bg-2-" + user.theme}>
+          <div className={"center right-container bg-2-" + user.theme}>
             {submitFailed && checkSolution() && checkAnswers() ? (
               <p>please check answers</p>
             ) : (
@@ -522,8 +527,16 @@ function EditQuestion({
   setLang,
   setAllQuestions,
   onChangeQuestion,
+  tests,
+  onChangeTests,
+  hiddenTests,
+  onChangeHiddenTest,
+  setAllTests,
   user
 }) {
+
+  console.log(tests);
+  console.log(hiddenTests);
   return (
     <div className={"left-container bg-2-" + user.theme}>
       {Object.keys(question).length !== 0 && (
@@ -571,46 +584,60 @@ function EditQuestion({
               />
             </div>
           )}
-          {/* <AceEditor
-                                key={LANGUAGES[lang] + "test case"}
-                                mode={LANGUAGES[lang]}
-                                placeholder="test cases"
-                                value={tests[LANGUAGES[lang]]}
-                                onChange={onChangeTest}
-                                theme="github"
-                                fontSize="14px"
-                                showPrintMargin={false}
-                                maxLines={50}
-                                style={{
-                                    marginBottom: 5,
-                                    height: "300px",
-                                    width: "80%",
-                                    borderRadius: "10px"
-                                }}
-                                editorProps={{
-                                    $blockScrolling: Infinity
-                                }}
-                            />
-                            <AceEditor
-                                key={LANGUAGES[lang] + "test case"}
-                                mode={LANGUAGES[lang]}
-                                placeholder="test cases"
-                                value={tests[LANGUAGES[lang]]}
-                                onChange={onChangeTest}
-                                theme="github"
-                                fontSize="14px"
-                                showPrintMargin={false}
-                                maxLines={50}
-                                style={{
-                                    marginBottom: 5,
-                                    height: "300px",
-                                    width: "80%",
-                                    borderRadius: "10px"
-                                }}
-                                editorProps={{
-                                    $blockScrolling: Infinity
-                                }}
-                            /> */}
+          {lang !== -1 && (
+            <div className="center" style={{width: "100%", flexDirection: "column"}}>
+              {tests[LANGUAGES[lang]].map((test, i) => (
+                <AceEditor
+                  key={LANGUAGES[lang] + "test case" + i}
+                  mode={LANGUAGES[lang]}
+                  placeholder="test case"
+                  value={tests[LANGUAGES[lang]][i]}
+                  onChange={ev => onChangeTests(ev, i)}
+                  theme="github"
+                  fontSize="14px"
+                  showPrintMargin={false}
+                  maxLines={50}
+                  style={{
+                    marginBottom: 5,
+                    height: "300px",
+                    width: "80%",
+                    borderRadius: "10px"
+                  }}
+                  editorProps={{
+                    $blockScrolling: Infinity
+                  }}
+                />
+              ))}
+              <button className={"btn-small bg-3-" + user.theme}>add</button>
+            </div>
+          )}
+          {lang !== -1 && (
+            <div>
+              {hiddenTests[LANGUAGES[lang]].map((test, i) => (
+                <AceEditor
+                  key={LANGUAGES[lang] + "hidden test case" + i}
+                  mode={LANGUAGES[lang]}
+                  placeholder="hidden test case"
+                  value={hiddenTests[LANGUAGES[lang]][i]}
+                  onChange={ev => onChangeHiddenTest(ev, i)}
+                  theme="github"
+                  fontSize="14px"
+                  showPrintMargin={false}
+                  maxLines={50}
+                  style={{
+                    marginBottom: 5,
+                    height: "300px",
+                    width: "80%",
+                    borderRadius: "10px"
+                  }}
+                  editorProps={{
+                    $blockScrolling: Infinity
+                  }}
+                />
+              ))}
+              <button className={"btn-small bg-2-" + user.theme}>add</button>
+            </div>
+          )}
         </div>
       )}
     </div>
