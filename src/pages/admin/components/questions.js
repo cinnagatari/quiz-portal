@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import QuestionEditor from "./questionEditor";
+import QuestionEditor from "./questionEditor/questionEditor";
 import Popup from "../../../main/components/popup";
 import UserContext from "../../../utils/userContext";
 import { loadDB, version } from "../../../libraries/loadDB";
