@@ -79,7 +79,11 @@ const loadDB = {
         languages: q.data().languages,
         type: q.data().type,
         solution: q.data().solution,
-        placeholder: q.data().placeholder
+        placeholder: q.data().placeholder,
+        tests: q.data().tests,
+        hiddenTests: q.data().hiddenTests,
+        testAnswers: q.data().testAnswers,
+        hiddenTestAnswers: q.data().hiddenTestAnswers
       });
     });
     idb.questions.put({ all: "questions", questions: questions });
