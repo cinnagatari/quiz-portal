@@ -31,8 +31,6 @@ export default function EditQuestion({
     setHiddenTests,
     hiddenTestAnswers,
     setHiddenTestAnswers,
-    time,
-    setTime,
     type,
     mode,
     submit,
@@ -267,12 +265,9 @@ export default function EditQuestion({
                             <div
                                 style={{
                                     width: "80%",
-                                    justifyContent: "space-between",
-                                    display: 'flex',
-                                    flexDirection: 'row'
+                                    justifyContent: "flex-start",
                                 }}
                             >
-                                <div>
                                     <button
                                         onClick={() => addTestCase(false)}
                                         style={{
@@ -298,8 +293,6 @@ export default function EditQuestion({
                                             -
                                         </button>
                                     )}
-                                </div>
-                                <input className="inp -1" value={time} onChange={ev => setTime(ev.target.value)}/>
                             </div>
                         </div>
                     )}

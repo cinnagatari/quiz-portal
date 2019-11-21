@@ -151,7 +151,7 @@ export function CategoryEditor({
                                 <input
                                     className="inp-2"
                                     type="number"
-                                    placeholder="number"
+                                    placeholder="level"
                                     value={addCatNum}
                                     onChange={ev =>
                                         setAddCatNum(ev.target.value)
@@ -222,7 +222,7 @@ export function CategoryEditor({
                             >
                                 <input
                                     className="inp-2"
-                                    placeholder="name (letters only)"
+                                    placeholder="name"
                                     value={editCat}
                                     onChange={ev => {
                                         setEditCat(
@@ -245,7 +245,8 @@ export function CategoryEditor({
                                 />
                                 <input
                                     className="inp-2"
-                                    placeholder="number"
+                                    type="number"
+                                    placeholder="level"
                                     value={editCatNum}
                                     onChange={ev =>
                                         setEditCatNum(
@@ -437,7 +438,7 @@ export function CategoryEditor({
                                             >
                                                 <input
                                                     className="inp-2"
-                                                    placeholder="name (letters only)"
+                                                    placeholder="name"
                                                     value={newName}
                                                     onChange={ev => {
                                                         setNewName(
@@ -463,7 +464,8 @@ export function CategoryEditor({
                                                 />
                                                 <input
                                                     className="inp-2"
-                                                    placeholder="number"
+                                                    type="number"
+                                                    placeholder="level"
                                                     value={newNumber}
                                                     onChange={ev =>
                                                         setNewNumber(

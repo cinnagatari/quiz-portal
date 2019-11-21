@@ -14,8 +14,7 @@ export default function Question({
   id,
   question,
   language,
-  type,
-  answer
+  type
 }) {
   let user = useContext(UserContext);
 
@@ -23,13 +22,14 @@ export default function Question({
     instance.togglePreview();
   };
 
+  console.log(question);
   return (
     <div className="center fin-question">
       <div className="text">
         <SimpleMDE
           getMdeInstance={previewOnLoad}
           key={"fin-question" + id + language}
-          value={question}
+          value={question.question[language]}
           options={{
             lineWrapping: false,
             spellChecker: false,
@@ -37,17 +37,77 @@ export default function Question({
             status: false
           }}
         />
+        {question.type === "sa" && preview && (
+          <div>
+            {question.tests[language].map((test, i) => (
+              <AceEditor
+                key={"test case" + i}
+                mode={language}
+                placeholder="test case"
+                value={test}
+                theme={
+                  user.theme === "light" ? "github" : "tomorrow_night_eighties"
+                }
+                fontSize="14px"
+                showPrintMargin={false}
+                maxLines={50}
+                style={{
+                  height: "300px",
+                  width: "80%",
+                  borderRadius: "10px",
+                  marginBottom: 5
+                }}
+                editorProps={{
+                  $blockScrolling: Infinity
+                }}
+                setOptions={{
+                  readOnly: true
+                }}
+              />
+            ))}
+          </div>
+        )}
+        {question.type === "sa" && preview && (
+          <div>
+            {question.hiddenTests[language].map((test, i) => (
+              <AceEditor
+                key={"hidden test case" + i}
+                mode={language}
+                placeholder="test case"
+                value={test}
+                theme={
+                  user.theme === "light" ? "github" : "tomorrow_night_eighties"
+                }
+                fontSize="14px"
+                showPrintMargin={false}
+                maxLines={50}
+                style={{
+                  height: "300px",
+                  width: "80%",
+                  borderRadius: "10px",
+                  marginBottom: 5
+                }}
+                editorProps={{
+                  $blockScrolling: Infinity
+                }}
+                setOptions={{
+                  readOnly: true
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
       <div className="center fin-ans">
-        {type === "sa" && (
+        {question.type === "sa" && (
           <AceEditor
             key={"final-fr" + id}
-            value={answer}
+            value={question.placeholder[language]}
             mode={language}
             theme="github"
             fontSize="14px"
             showPrintMargin={false}
-            style={{ maxHeight: "330px", width: "80%", borderRadius: '10px' }}
+            style={{ maxHeight: "330px", width: "80%", borderRadius: "10px" }}
             editorProps={{
               $blockScrolling: Infinity
             }}
@@ -56,10 +116,13 @@ export default function Question({
             }}
           />
         )}
-        {type === "mc" && (
+        {question.type === "mc" && (
           <div className="center mc-container">
-            {answer.map((a, i) => (
-              <button key={"final-mc" + id + i} className={"mc-ans-btn mc-ans-btn-" + user.theme}>
+            {question.answers[language].map((a, i) => (
+              <button
+                key={"final-mc" + id + i}
+                className={"mc-ans-btn mc-ans-btn-" + user.theme}
+              >
                 <AceEditor
                   key={"final-mc" + id + i}
                   value={a}

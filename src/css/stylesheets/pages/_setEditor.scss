@@ -2,8 +2,6 @@
   display: flex;
   flex-direction: column;
   width: 90vw;
-  max-height: 100vh;
-  overflow: auto;
   .s-title {
     padding: 5px;
     margin: 5px;
@@ -91,8 +89,8 @@
       margin: 5px;
       padding: 5px;
       min-width: 800px;
-      min-height: 70vh;
       flex-direction: column;
+      overflow: auto;
       .t-container {
         display: flex;
         flex-direction: row;

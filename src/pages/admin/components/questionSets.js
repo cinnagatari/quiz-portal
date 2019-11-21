@@ -271,31 +271,11 @@ export default function QuestionSets() {
                 <Question
                   preview={true}
                   id={currentQuestion.name}
-                  question={
-                    currentQuestion.question[
-                      language !== "none"
-                        ? language
-                        : currentQuestion.languages[0]
-                    ]
-                  }
+                  question={currentQuestion}
                   language={
                     language !== "none"
                       ? language
                       : currentQuestion.languages[0]
-                  }
-                  type={currentQuestion.type}
-                  answer={
-                    currentQuestion.type === "mc"
-                      ? currentQuestion.answers[
-                          language !== "none"
-                            ? language
-                            : currentQuestion.languages[0]
-                        ]
-                      : currentQuestion.placeholder[
-                          language !== "none"
-                            ? language
-                            : currentQuestion.languages[0]
-                        ]
                   }
                 />
               </div>
@@ -586,28 +566,11 @@ function EditSets({
             <Question
               preview={true}
               id={currentQuestion.name}
-              question={
-                currentQuestion.question[
-                  language !== "none" ? language : currentQuestion.languages[0]
-                ]
-              }
+              question={currentQuestion}
               language={
                 language !== "none" ? language : currentQuestion.languages[0]
               }
-              type={currentQuestion.type}
-              answer={
-                currentQuestion.type === "mc"
-                  ? currentQuestion.answers[
-                      language !== "none"
-                        ? language
-                        : currentQuestion.languages[0]
-                    ]
-                  : currentQuestion.placeholder[
-                      language !== "none"
-                        ? language
-                        : currentQuestion.languages[0]
-                    ]
-              }
+              user={user}
             />
           </div>
         )}

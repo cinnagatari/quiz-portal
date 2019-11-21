@@ -15,10 +15,10 @@
 .popup {
   border-radius: 5px;
   position: fixed;
-  left: 50%;
-  top: 50%;
+  top: 75px;
+  max-height: 85vh;
   padding: 10px;
-  transform: translate(-50%, -50%);
   z-index: 15;
   background-color: $white;
+  overflow: auto;
 }

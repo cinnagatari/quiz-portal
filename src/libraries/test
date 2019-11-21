@@ -18,12 +18,14 @@ class Main {
 
     static void timeout(int a) {
         int[] ar = new int[1000000];
-        for(int val : ar) {
-            for(int val2: ar) {
-                for(int val3: ar) {
-                    ar = ar;
-                }
-            }
+        fn(ar);
+        System.out.println(a);
+    }
+    
+    static void fn(int[] ar) {
+        for(int c = 0; c < 8000; c++) 
+        for(int i = 0; i < ar.length; i++) {
+            ar[i] = i;
         }
     }
     
@@ -36,10 +38,10 @@ class Main {
     public static void main(String[] args) throws Exception {
         BufferedReader f = new BufferedReader(new InputStreamReader(System.in));
         
-        correct(Integer.parseInt(f.readLine()));
+        // correct(Integer.parseInt(f.readLine()));
         // wrong(Integer.parseInt(f.readLine()));
         // runtime(Integer.parseInt(f.readLine()));
-        // timeout(Integer.parseInt(f.readLine()));
+        timeout(Integer.parseInt(f.readLine()));
         // stackOverflow(Integer.parseInt(f.readLine()));
      
         f.close();

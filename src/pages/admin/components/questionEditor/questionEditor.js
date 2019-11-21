@@ -35,7 +35,6 @@ export default function QuestionEditor({
     let [testAnswers, setTestAnswers] = useState({});
     let [hiddenTests, setHiddenTests] = useState({});
     let [hiddenTestAnswers, setHiddenTestAnswers] = useState({});
-    let [time, setTime] = useState(parseFloat(0));
     let [placeholder, setPlaceholder] = useState({});
     let [answers, setAnswers] = useState({});
     let [difficulty, setDifficulty] = useState(-1);
@@ -261,8 +260,6 @@ export default function QuestionEditor({
                         setHiddenTests={setHiddenTests}
                         hiddenTestAnswers={hiddenTestAnswers}
                         setHiddenTestAnswers={setHiddenTestAnswers}
-                        time={time}
-                        setTime={setTime}
                         mode={mode}
                         submit={() => submit()}
                         type={type}
@@ -336,8 +333,6 @@ export default function QuestionEditor({
                                         setHiddenTestAnswers={setHiddenTestAnswers}
                                         processing={processing}
                                         setProcessing={setProcessing}
-                                        time={time}
-                                        setTime={setTime}
                                         reload={reload}
                                         setReload={setReload}
                                         user={user}
